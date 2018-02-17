@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CS 446 Project</string>
+    <string name="file_name">File name here</string>
+    <string name="time_placeholder">0:00</string>
+</resources>
