@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     public void onTogglePlay(View v) {
         if (stopped) {
             createMediaPlayers();
+            currentSong = 0;
             songLength = mediaPlayers.get(currentSong).getDuration();
             // Thread to update the song progress bar, elapsed time, and remaining time
             new Thread(new Runnable() {
@@ -161,8 +162,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                 mediaPlayers.get(i).release();
                 mediaPlayers.set(i, null);
             }
-            playPauseButtons.setImageResource(R.drawable.play);
         }
+        playPauseButtons.setImageResource(R.drawable.play);
     }
 
     // Ke Qiao Chen: I based this method on Valentina Chumak's answer in
