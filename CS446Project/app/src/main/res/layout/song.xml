@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Ke Qiao Chen: I based this file on
+https://github.com/quocnguyenvan/media-player-demo/blob/master/app/src/main/res/layout/custom_music_item.xml
+but changed the formatting of the widgets from that in the tutorial, since the tutorial implements
+play, pause, and stop buttons for each song, whereas I do not but instead show a progress bar,
+elapsed time, and remaining time for each song. The tutorial also shows the name of the singer for
+each song, whereas I do not. -->
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">

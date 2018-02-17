@@ -15,6 +15,27 @@ import java.util.ArrayList;
  * Created by Qian on 2018-02-15.
  */
 
+// Ke Qiao Chen: I based this class on
+// https://github.com/quocnguyenvan/media-player-demo/blob/master/app/src/main/java/com/quocnguyen/mediaplayerdemo/CustomMusicAdapter.java
+// except for the following changes:
+// - In the tutorial, play, pause, and stop buttons are available for each song. Since my
+// implementation only allows the user to play, pause, and stop an entire playlist, I do not
+// include these buttons in this class. Instead, I use a similar idea to show for each song a
+// progress bar, the elapsed time, and the remaining time.
+// - This class in the tutorial only has 1 MediaPlayer, whereas I have an ArrayList of MediaPlayers.
+// I implemented the class this way because I need to show the length of each song in the playlist,
+// including songs that have not yet started to play. Therefore, in MainActivity.java's
+// onCreate(Bundle savedInstanceState) method, I create a MediaPlayer for each song in the playlist
+// so that I can find out the duration of each song.
+// - Because MainActivity.java must update a song's progress bar, elapsed time, and remaining time
+// as the song plays, I created ArrayLists for each of these widgets and implemented get methods for
+// them.
+// - In the method getView(int position, View convertView, ViewGroup parent), I only set the widgets
+//  of each ViewHolder once (ViewHolder represents the GUI widgets for a song in the playlist)
+// because songs' file names remain constant and MainActivity.java later updates the progress bar,
+// elapsed time, and remaining time. That is, I only set the widgets of a viewHolder if convertView
+// is null, meaning the GUI widgets for a song have not yet been created and the program is calling
+// getView(int position, View convertView, ViewGroup parent) to create them.
 public class CustomMusicAdapter extends BaseAdapter {
 
     private Context context;
@@ -63,19 +84,17 @@ public class CustomMusicAdapter extends BaseAdapter {
             LayoutInflater layoutInflater =
                     (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(layout, null);
-            viewHolder.textFileName = (TextView) convertView.findViewById(R.id.fileName);
-            viewHolder.songProgressBar = (SeekBar) convertView.findViewById(R.id.songProgressBar);
+            viewHolder.textFileName = convertView.findViewById(R.id.fileName);
+            viewHolder.songProgressBar = convertView.findViewById(R.id.songProgressBar);
             songProgressBars.add(viewHolder.songProgressBar);
             elapsedTimes.add((TextView) convertView.findViewById(R.id.elapsedTime));
-            viewHolder.remainingTime = (TextView) convertView.findViewById(R.id.remainingTime);
+            viewHolder.remainingTime = convertView.findViewById(R.id.remainingTime);
             remainingTimes.add(viewHolder.remainingTime);
             convertView.setTag(viewHolder);
             viewHolder.textFileName.setText(playlistSong.getFileName());
             int currentSongLength = mediaPlayers.get(position).getDuration();
             viewHolder.songProgressBar.setMax(currentSongLength);
             viewHolder.remainingTime.setText("-" + mainActivity.formatTime(currentSongLength));
-        } else {
-            viewHolder = (ViewHolder) convertView.getTag();
         }
         return convertView;
     }
