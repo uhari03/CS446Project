@@ -186,4 +186,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         movingToNextSong = false;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (MediaPlayer mediaPlayer : mediaPlayers) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
 }
