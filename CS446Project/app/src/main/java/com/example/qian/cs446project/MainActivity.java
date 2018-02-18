@@ -189,6 +189,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        System.out.println("entered onDestroy()");
+        stopped = true;
         for (MediaPlayer mediaPlayer : mediaPlayers) {
             mediaPlayer.release();
             mediaPlayer = null;
