@@ -136,40 +136,36 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         }
     };
 
+    private void resetPlaylist() {
+        stopped = true;
+        for (int i = 0; i < mediaPlayers.size(); ++i) {
+            customMusicAdapter.getSongProgressBars().get(i).setProgress(0);
+            customMusicAdapter.getElapsedTimes().get(i).setText(formatTime(0));
+            customMusicAdapter.getRemainingTimes().get(i).
+                    setText("-" + formatTime(mediaPlayers.get(i).getDuration()));
+        }
+        playPauseButtons.setImageResource(R.drawable.play);
+    }
+
     // Ke Qiao Chen: I based this method on viewHolder.ivStop's OnClickListener in
     // https://github.com/quocnguyenvan/media-player-demo/blob/master/app/src/main/java/com/quocnguyen/mediaplayerdemo/CustomMusicAdapter.java
     // except that
-    // - I clean up a MediaPlayer instance for each song in the playlist, instead of just the
-    // current song. I need to do so because I need to show the duration of each song before the
-    // user starts the playlist. To find out the duration of a song, I need to call the
-    // getDuration() method on the MediaPlayer instance for that song. Therefore, I needed to
-    // create a MediaPlayer instance for each song in the playlist before the user starts the
-    // playlist.
-    // - The tutorial does not set a MediaPlayer instance to null after releasing it, but I do this
-    // because Java's garbage collector cannot detect shortage of media-related resources
-    // (https://developer.android.com/guide/topics/media/mediaplayer.html#mpandservices).
-    // - I also reset each song's progress bar, elapsed time, and remaining time. The tutorial does
+    // - I do not release the MediaPlayers because it is likely that the user will replay the
+    // playlist after stopping it.
+    // - I reset each song's progress bar, elapsed time, and remaining time. The tutorial does not
     // not include these widgets.
     public void onStop(View v) {
         if (!stopped) {
-            stopped = true;
             mediaPlayers.get(currentSong).stop();
-            for (int i = 0; i < mediaPlayers.size(); ++i) {
-                customMusicAdapter.getSongProgressBars().get(i).setProgress(0);
-                customMusicAdapter.getElapsedTimes().get(i).setText(formatTime(0));
-                customMusicAdapter.getRemainingTimes().get(i).
-                        setText("-" + formatTime(mediaPlayers.get(i).getDuration()));
-                mediaPlayers.get(i).release();
-                mediaPlayers.set(i, null);
-            }
+            resetPlaylist();
         }
-        playPauseButtons.setImageResource(R.drawable.play);
     }
 
     // Ke Qiao Chen: I based this method on Valentina Chumak's answer in
     // https://stackoverflow.com/questions/10916129/playing-multiple-files-in-mediaplayer-one-after-other-in-android
     // except for the following changes:
-    // - I set a MediaPlayer instance to null after I release it.
+    // - I do not release the MediaPlayer because it is likely that the user will replay the
+    // playlist after it finishes.
     // - I increment currentSong before checking if it is less than the number of songs in the
     // playlist. The answer increments currentSong after the check, but this results in off-by-1
     // errors.
@@ -179,15 +175,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     @Override
     public void onCompletion(MediaPlayer mp) {
         movingToNextSong = true;
-        mediaPlayers.get(currentSong).release();
-        mediaPlayers.set(currentSong, null);
         ++currentSong;
         if (currentSong < playlist.size()) {
             songProgressBar = customMusicAdapter.getSongProgressBars().get(currentSong);
             songLength = mediaPlayers.get(currentSong).getDuration();
             mediaPlayers.get(currentSong).start();
         } else {
-            stopped = true;
+            resetPlaylist();
         }
         movingToNextSong = false;
     }
