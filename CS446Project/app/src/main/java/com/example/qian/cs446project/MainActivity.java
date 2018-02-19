@@ -22,8 +22,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private Boolean movingToNextSong = false;
     private ImageView playPauseButtons;
     private SeekBar songProgressBar;
-    private TextView elapsedTime;
-    private TextView remainingTime;
     private int songLength;
     private CustomMusicAdapter customMusicAdapter;
 
@@ -47,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         playlist.add(new PlaylistSong("Sovngarde Song", R.raw.sovngarde_song));
         playlist.add(new PlaylistSong("Commander Shepard", R.raw.commander_shepard));
         playlist.add(new PlaylistSong("Big Ten", R.raw.big_ten));
+        playlist.add(new PlaylistSong("Sweet L.A.", R.raw.sweet_l_a));
         createMediaPlayers();
         customMusicAdapter =
                 new CustomMusicAdapter(this, R.layout.song, playlist, mediaPlayers);
@@ -128,9 +127,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             songProgressBar.setProgress(currentPosition);
             // Update elapsed time and remaining time.
             String elapsedTimeValue = formatTime(currentPosition);
-            elapsedTime = customMusicAdapter.getElapsedTimes().get(currentSong);
+            TextView elapsedTime = customMusicAdapter.getElapsedTimes().get(currentSong);
             elapsedTime.setText(elapsedTimeValue);
-            remainingTime = customMusicAdapter.getRemainingTimes().get(currentSong);
+            TextView remainingTime = customMusicAdapter.getRemainingTimes().get(currentSong);
             String remainingTimeValue = formatTime(songLength - currentPosition);
             remainingTime.setText("-" + remainingTimeValue);
         }
@@ -189,7 +188,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        System.out.println("entered onDestroy()");
         stopped = true;
         for (MediaPlayer mediaPlayer : mediaPlayers) {
             mediaPlayer.release();

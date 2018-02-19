@@ -10,6 +10,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Qian on 2018-02-15.
@@ -46,6 +47,7 @@ public class CustomMusicAdapter extends BaseAdapter {
     private ArrayList<TextView> elapsedTimes = new ArrayList<>();
     private ArrayList<TextView> remainingTimes = new ArrayList<>();
     private MainActivity mainActivity = new MainActivity();
+    private HashMap<Integer, View> displayedSongs = new HashMap<>();
 
     public CustomMusicAdapter(Context context, int layout, ArrayList<PlaylistSong> playlistSongs,
                               ArrayList<MediaPlayer> mediaPlayers) {
@@ -79,7 +81,7 @@ public class CustomMusicAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         PlaylistSong playlistSong = playlistSongs.get(position);
-        if (convertView == null) {
+        if (!displayedSongs.containsKey(position)) {
             viewHolder = new ViewHolder();
             LayoutInflater layoutInflater =
                     (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -90,11 +92,14 @@ public class CustomMusicAdapter extends BaseAdapter {
             elapsedTimes.add((TextView) convertView.findViewById(R.id.elapsedTime));
             viewHolder.remainingTime = convertView.findViewById(R.id.remainingTime);
             remainingTimes.add(viewHolder.remainingTime);
-            convertView.setTag(viewHolder);
             viewHolder.textFileName.setText(playlistSong.getFileName());
             int currentSongLength = mediaPlayers.get(position).getDuration();
             viewHolder.songProgressBar.setMax(currentSongLength);
             viewHolder.remainingTime.setText("-" + mainActivity.formatTime(currentSongLength));
+            convertView.setTag(viewHolder);
+            displayedSongs.put(position, convertView);
+        } else {
+            convertView = displayedSongs.get(position);
         }
         return convertView;
     }
