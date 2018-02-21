@@ -12,7 +12,7 @@ public abstract class BaseConnectionManager implements ConnectionManager {
     protected BroadcastReceiver broadcastReceiver = null;
     protected IntentFilter intentFilter = null;
 
-    // Common connectivity methods for ConnectionManager.
+    // Methods for common connectivity of ConnectionManager.
     public abstract void initiateSession();
     public abstract void joinSession();
 

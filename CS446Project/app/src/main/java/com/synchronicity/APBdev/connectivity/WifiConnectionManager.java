@@ -4,9 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.os.Looper;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Andrew on 2018-02-15.
@@ -24,43 +26,102 @@ public class WifiConnectionManager extends BaseConnectionManager {
     public WifiConnectionManager(Context context) {
         this.context = context;
         this.manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
-        this.channel = manager.initialize(context, context.getMainLooper(), null)
+        this.channel = manager.initialize(context, context.getMainLooper(), null);
     }
 
-
-
-    // Methods
-    public void discoverPeers () {
-        try {
-            this.manager.discoverPeers(channel, new WifiP2pManager.ActionListener(){
-                @Override
-                public void onSuccess() {
-                    // Stub
-                }
-                @Override
-                public void onFailure (int reasonCode) {
-                    throw new Exception("Could not find peers!");
-                }
-            });
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            e.printStackTrace();
-        }
+    @Override
+    public void sendData(){
+        return;
     }
 
-    public void requestPeers () {
-            try {
-                this.manager.requestPeers(this.channel, new WifiP2pManager.PeerListListener() {
-                    @Override
-                    public void onPeersAvailable(WifiP2pDeviceList peers) {
-                        // Do stuff with available peers.
-                    }
-                });
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-                e.printStackTrace();
+    @Override
+    public void receiveData() {
+        return;
+    }
+
+    // --- Methods for common connectivity of ConnectionManager.
+
+
+
+    /*
+        Draws on examples from the Android Developers Guide.
+        https://developer.android.com/training/connect-devices-wirelessly/nsd-wifi-direct.html
+     */
+
+    /*
+        Draws on examples from the following URL:
+        https://androiddevsimplified.wordpress.com/2016/09/14/wifi-direct-service-discovery-in-android/
+
+        Most of the examples describe templates for handling NSD and what the various callback
+        methods are used for. The examples do not describe explicitly how to use the framework
+        with respect to our application and therefore functionality will diverge beyond simple
+        set up of the service
+     */
+
+    @Override
+    public void initiateSession() {
+        String serviceName = "SynchronicityCS446";
+        String serviceProtocol = "_presence._tcp";
+        String sessionName = "testSession";
+        this.registerForNSD(serviceName, serviceProtocol, sessionName);
+    }
+
+    @Override
+    public void joinSession() {
+        this.findServices();
+    }
+
+    // Methods for Network Service Discovery (NSD).
+    private void registerForNSD(String serviceName, String serviceProtocol, String sessionName) {
+        Map record = new HashMap();
+        /*
+            Uses hardcoded String values. Consider moving these to a more central point of control.
+            This describes our service and lets other potential peers know information about the
+            session that they can join. Once they have selected a session, they should use this
+            information to connect to the peer advertising this service.
+         */
+        record.put("sessionName", sessionName);
+        record.put("listenPort", "foo"); // Add a port here
+        record.put("available", "visible");
+        WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance(serviceName, serviceProtocol, record);
+        WifiP2pManager.ActionListener actionListener = new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                // Use for actions when the service is successfully registered.
             }
+
+            @Override
+            public void onFailure(int reason) {
+                // Use for actions when the service is NOT successfully registered.
+            }
+        };
+        this.manager.addLocalService(channel, serviceInfo, actionListener);
     }
+
+    private void findServices () {
+        WifiP2pManager.DnsSdServiceResponseListener serviceListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+            @Override
+            public void onDnsSdServiceAvailable(String instanceName, String registrationType, WifiP2pDevice srcDevice) {
+                // Check for our app here. Could this discovery be an echo of our own broadcast?
+                // If not our own broadcast, get some info about the broadcast and give it the user to select a room?
+            }
+        };
+        WifiP2pManager.DnsSdTxtRecordListener textListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+            @Override
+            public void onDnsSdTxtRecordAvailable(String fullDomainName, Map<String, String> txtRecordMap, WifiP2pDevice srcDevice) {
+                /*
+                    Get information about the service from the text record. Probably store the name
+                    of the rooms and the person that you can connect with.
+                 */
+            }
+        };
+        this.manager.setDnsSdResponseListeners(channel, serviceListener, textListener);
+    }
+
+
+
+    // --- Methods + Class info for BroadcastReceiver specific to this object.
+
 
 
     // BroadcastReceiver stuff.
@@ -124,4 +185,3 @@ public class WifiConnectionManager extends BaseConnectionManager {
         }
     }
 }
-
