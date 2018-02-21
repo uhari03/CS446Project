@@ -2,4 +2,7 @@
     <string name="app_name">CS 446 Project</string>
     <string name="file_name">File name here</string>
     <string name="time_placeholder">0:00</string>
+    <string name="create_session">Create Session</string>
+    <string name="join_session">Join Session</string>
+    <string name="manage_playlist">Manage Playlist</string>
 </resources>

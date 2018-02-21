@@ -9,38 +9,31 @@
     android:paddingTop="5dp"
     tools:context="com.example.qian.cs446project.MainActivity">
 
-    <RelativeLayout
-        android:id="@+id/buttonPanel"
+    <Button
+        android:id="@+id/create_session"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/join_session"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="106dp"
+        android:text="@string/create_session" />
 
-        <ImageView
-            android:id="@+id/playPauseButtons"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
-            android:src="@drawable/play"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:onClick="onTogglePlay" />
-
-        <ImageView
-            android:id="@+id/stopButton"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
-            android:layout_toEndOf="@id/playPauseButtons"
-            android:layout_toRightOf="@id/playPauseButtons"
-            android:src="@drawable/stop"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:onClick="onStop" />
-
-    </RelativeLayout>
-
-    <ListView
-        android:id="@+id/songlist"
-        android:layout_below="@id/buttonPanel"
+    <Button
+        android:id="@+id/join_session"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="51dp"
+        android:text="@string/join_session" />
 
-    </ListView>
+    <Button
+        android:id="@+id/manage_playlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="92dp"
+        android:text="@string/manage_playlist" />
+
 </RelativeLayout>

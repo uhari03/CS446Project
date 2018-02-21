@@ -46,7 +46,7 @@ public class CustomMusicAdapter extends BaseAdapter {
     private ArrayList<SeekBar> songProgressBars = new ArrayList<>();
     private ArrayList<TextView> elapsedTimes = new ArrayList<>();
     private ArrayList<TextView> remainingTimes = new ArrayList<>();
-    private MainActivity mainActivity = new MainActivity();
+    private MusicPlayer musicPlayer = new MusicPlayer();
     private HashMap<Integer, View> displayedSongs = new HashMap<>();
 
     public CustomMusicAdapter(Context context, int layout, ArrayList<PlaylistSong> playlistSongs,
@@ -95,7 +95,7 @@ public class CustomMusicAdapter extends BaseAdapter {
             viewHolder.textFileName.setText(playlistSong.getFileName());
             int currentSongLength = mediaPlayers.get(position).getDuration();
             viewHolder.songProgressBar.setMax(currentSongLength);
-            viewHolder.remainingTime.setText("-" + mainActivity.formatTime(currentSongLength));
+            viewHolder.remainingTime.setText("-" + musicPlayer.formatTime(currentSongLength));
             convertView.setTag(viewHolder);
             displayedSongs.put(position, convertView);
         } else {
