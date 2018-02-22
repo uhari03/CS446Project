@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.example.qian.cs446project.R;
@@ -23,11 +24,15 @@ import java.util.Map;
 
 public class WifiConnectionManager extends BaseConnectionManager {
     //Fields
-    Context context;
-    Activity activity;
-    WifiP2pManager manager;
-    WifiP2pManager.Channel channel;
+    private Context context;
+    private Activity activity;
+    private WifiP2pManager manager;
+    private WifiP2pManager.Channel channel;
+    private WifiP2pDnsSdServiceInfo serviceInfo;
+    private WifiP2pServiceRequest serviceRequest;
 
+    // Debug constants
+    private final String TAG = "WifiConnectionManager";
 
     // Constructors.
     public WifiConnectionManager(Context context, Activity activity) {
@@ -35,6 +40,8 @@ public class WifiConnectionManager extends BaseConnectionManager {
         this.context = context;
         this.manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
         this.channel = manager.initialize(context, context.getMainLooper(), null);
+        this.serviceInfo = null;
+        this.serviceRequest = null;
     }
 
 
@@ -79,7 +86,13 @@ public class WifiConnectionManager extends BaseConnectionManager {
 
     @Override
     public void joinSession() {
-        this.findServices();
+        this.discoverForNSD();
+    }
+
+
+    @Override
+    public void cleanUp() {
+        this.cleanUpForNSD();
     }
 
 
@@ -95,7 +108,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
         record.put("sessionName", sessionName);
         record.put("listenPort", "foo"); // Add a port here
         record.put("available", "visible");
-        WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance(serviceName, serviceProtocol, record);
+        serviceInfo = WifiP2pDnsSdServiceInfo.newInstance(serviceName, serviceProtocol, record);
         WifiP2pManager.ActionListener actionListener = new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
@@ -113,14 +126,14 @@ public class WifiConnectionManager extends BaseConnectionManager {
     }
 
 
-    private void findServices () {
+    private void discoverForNSD() {
         WifiP2pManager.DnsSdServiceResponseListener serviceListener = new WifiP2pManager.DnsSdServiceResponseListener() {
             @Override
             public void onDnsSdServiceAvailable(String instanceName, String registrationType, WifiP2pDevice srcDevice) {
                 // Check for our app here. Could this discovery be an echo of our own broadcast?
                 // If not our own broadcast, get some info about the broadcast and give it the user to select a room?
                 screenDebug("Checking for services: Service found!\n");
-                screenDebug("Instance Name: " + instanceName);
+                screenDebug("Instance Name: " + instanceName + "\n");
             }
         };
         WifiP2pManager.DnsSdTxtRecordListener textListener = new WifiP2pManager.DnsSdTxtRecordListener() {
@@ -131,7 +144,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
                     of the rooms and the person that you can connect with.
                  */
                 screenDebug("Check for text records: Text record found!\n");
-                screenDebug("Session name: " + txtRecordMap.get("sessionName"));
+                screenDebug("Session name: " + txtRecordMap.get("sessionName") + "\n");
             }
         };
         this.manager.setDnsSdResponseListeners(this.channel, serviceListener, textListener);
@@ -148,7 +161,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
                 screenDebug("Check if service request added: Service NOT added!\n");
              }
         };
-        WifiP2pServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
         this.manager.addServiceRequest(this.channel, serviceRequest, addServiceActionListener);
 
         // Use this in this.manager.discoverServices.
@@ -168,6 +181,45 @@ public class WifiConnectionManager extends BaseConnectionManager {
     }
 
 
+    private void cleanUpForNSD() {
+        // Make sure that if we registered a service, then clean it up.
+        if (this.serviceInfo != null) {
+            WifiP2pManager.ActionListener removeServiceActionListener = new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Success! Removed local service! (De-registered.)");
+                    screenDebug("Success! Removed local service! (De-registered.)\n");
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    Log.d(TAG, "Failure! Did not remove local service! (De-registration failed.)");
+                    screenDebug("Failure! Did not remove local service! (De-registration failed.)\n");
+                }
+            };
+            this.manager.removeLocalService(this.channel, this.serviceInfo, removeServiceActionListener);
+        }
+        // Make sure that we if we requested to look for a service that we clean it up.
+        if (this.serviceRequest != null) {
+            WifiP2pManager.ActionListener removeRequestActionListener = new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "Success! Removed local service discovery request! (Removed.)");
+                    screenDebug("Success! Removed local service discovery request! (Removed.)\n");
+                }
+
+                @Override
+                public void onFailure(int reason) {
+                    Log.d(TAG, "Failure! Did not remove local service discovery request! (Removal failure.)");
+                    screenDebug("Failure! Did not remove local service discovery request! (Removal failure.)\n");
+                }
+            };
+            this.manager.removeServiceRequest(this.channel, this.serviceRequest, removeRequestActionListener);
+        }
+    }
+
+
+    // Debug method.
     private void screenDebug(String message) {
         TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
         textView.append(message);

@@ -15,6 +15,7 @@ public abstract class BaseConnectionManager implements ConnectionManager {
     // Methods for common connectivity of ConnectionManager.
     public abstract void initiateSession();
     public abstract void joinSession();
+    public abstract void cleanUp();
 
     // Common data xfer methods for ConnectionManager.
     public abstract void sendData();

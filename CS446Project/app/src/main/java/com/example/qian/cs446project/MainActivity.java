@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
@@ -23,14 +24,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initSession (View view) {
-        connectionManager.initiateSession();
         TextView textView = findViewById(R.id.logBox);
-        textView.setText("Started broadcasting service!\n");
+        textView.append("Started broadcasting service!\n");
+        connectionManager.initiateSession();
     }
 
     public void findSession (View view) {
-        connectionManager.joinSession();
         TextView textView = findViewById(R.id.logBox);
-        textView.setText("Started searching for service!\n");
+        textView.append("Started searching for service!\n");
+        connectionManager.joinSession();
+    }
+
+    public void cleanUpSession (View view) {
+        TextView textView = findViewById(R.id.logBox);
+        textView.append("Starting clean up!\n");
+        connectionManager.cleanUp();
     }
 }
