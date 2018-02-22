@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.example.qian.cs446project.MainActivity">
 
+<<<<<<< HEAD
     <Button
         android:id="@+id/startServiceButton"
         android:layout_width="wrap_content"
@@ -13,10 +14,18 @@
         android:layout_marginTop="32dp"
         android:onClick="initSession"
         android:text="Start Service"
+=======
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="c"
+        app:layout_constraintBottom_toBottomOf="parent"
+>>>>>>> origin/APBdev-Workspace
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+<<<<<<< HEAD
     <Button
         android:id="@+id/findServiceButton"
         android:layout_width="wrap_content"
@@ -47,4 +56,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/findServiceButton"
         app:layout_constraintVertical_bias="1.0" />
+=======
+>>>>>>> origin/APBdev-Workspace
 </android.support.constraint.ConstraintLayout>
