@@ -39,7 +39,7 @@ public class ParticipantMusicPlayer extends AppCompatActivity
     private SeekBar songProgressBar;
     private int songLength;
     private CustomMusicAdapter customMusicAdapter;
-    private static final TimeFormatter timeFormatter = new TimeFormatter();
+    private static final CS446Utils cs446Utils = new CS446Utils();
     private Context applicationContext = getApplicationContext();
 
     private void createMediaPlayer() {
@@ -85,7 +85,7 @@ public class ParticipantMusicPlayer extends AppCompatActivity
     // except that tutorial only plays a single song instead of a playlist. To update the progress
     // bar, elapsed time, and remaining time for specific songs, I use the currentSong variable to
     // specify a song in the playlist.
-    private Handler handler = new Handler() {
+    private Handler timeUpdateHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             int currentPosition = msg.what;
@@ -93,12 +93,12 @@ public class ParticipantMusicPlayer extends AppCompatActivity
             songProgressBar = customMusicAdapter.getSongProgressBars().get(currentSong);
             songProgressBar.setProgress(currentPosition);
             // Update elapsed time and remaining time.
-            String elapsedTimeValue = timeFormatter.formatTime(currentPosition);
+            String elapsedTimeValue = cs446Utils.formatTime(currentPosition);
             TextView elapsedTime = customMusicAdapter.getElapsedTimes().get(currentSong);
             elapsedTime.setText(elapsedTimeValue);
             TextView remainingTime = customMusicAdapter.getRemainingTimes().get(currentSong);
             String remainingTimeValue =
-                    timeFormatter.formatTime(songLength - currentPosition);
+                    cs446Utils.formatTime(songLength - currentPosition);
             remainingTime.setText("-" + remainingTimeValue);
         }
     };
@@ -127,9 +127,9 @@ public class ParticipantMusicPlayer extends AppCompatActivity
         for (int i = 0; i < playlist.songs.size(); ++i) {
             customMusicAdapter.getSongProgressBars().get(i).setProgress(0);
             customMusicAdapter.getElapsedTimes().get(i)
-                    .setText(timeFormatter.formatTime(0));
+                    .setText(cs446Utils.formatTime(0));
             customMusicAdapter.getRemainingTimes().get(i).
-                    setText("-" + timeFormatter.formatTime(playlist.songs.get(i).getDuration()));
+                    setText("-" + cs446Utils.formatTime(playlist.songs.get(i).getDuration()));
         }
     }
 
@@ -173,7 +173,7 @@ public class ParticipantMusicPlayer extends AppCompatActivity
                             if (!movingToNextSong) {
                                 Message message = new Message();
                                 message.what = mediaPlayer.getCurrentPosition();
-                                handler.sendMessage(message);
+                                timeUpdateHandler.sendMessage(message);
                                 Thread.sleep(1000);
                             }
                         } catch (InterruptedException interruptedException) {

@@ -19,7 +19,7 @@ public class PlaylistManager {
     // listAllDeviceSongs searches the device for all audio files and generates an ArrayList<com.example.qian.cs446project.Song> object for all
     // the songs to return.
     public static ArrayList<Song> listAllDeviceSongs(Context ctx) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START LIST ALL SONGS");
+        Log.d("Playlist Manager", "START LIST ALL SONGS");
 
         // Retrieve all device songs and place them into a Cursor object.
         Cursor allSongsCursor = ctx.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
@@ -35,22 +35,22 @@ public class PlaylistManager {
                 String filePath = allSongsCursor.getString(allSongsCursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                 int id = allSongsCursor.getInt(allSongsCursor.getColumnIndex(MediaStore.Audio.Media._ID));
 
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Title: " + title);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Album: " + album);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Artist: " + artist);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Duration: " + id);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "File Path: " + filePath);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "ID: " + id);
+                Log.d("Playlist Manager", "Title: " + title);
+                Log.d("Playlist Manager", "Album: " + album);
+                Log.d("Playlist Manager", "Artist: " + artist);
+                Log.d("Playlist Manager", "Duration: " + id);
+                Log.d("Playlist Manager", "File Path: " + filePath);
+                Log.d("Playlist Manager", "ID: " + id);
 
                 if (!allDeviceSongs.add(new Song(title, album, artist, duration, filePath, id))) {
-                    Log.e("com.example.qian.cs446project.PlaylistManager", "Could not add song " + title + " with ID: " + id);
+                    Log.e("Playlist Manager", "Could not add song " + title + " with ID: " + id);
                     allSongsCursor.close();
                     return null;
                 }
             }
             allSongsCursor.close();
         } else {
-            Log.d("com.example.qian.cs446project.PlaylistManager", "No songs found on device");
+            Log.d("Playlist Manager", "No songs found on device");
         }
 
         // Return appropriate value.
@@ -63,7 +63,7 @@ public class PlaylistManager {
     // com.example.qian.cs446project.Playlist objects do not have their songs attribute populated. Please call
     // com.example.qian.cs446project.PlaylistManager.listAllPlaylistSongs to populate the songs attribute.
     public static ArrayList<Playlist> listAllAppPlaylists(Context ctx) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START LIST ALL PLAYLISTS");
+        Log.d("Playlist Manager", "START LIST ALL PLAYLISTS");
 
         // Retrieve all app playlists and place them into a Cursor object.
         Cursor allPlaylistsCursor = ctx.getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
@@ -75,11 +75,11 @@ public class PlaylistManager {
                 String playlistName = allPlaylistsCursor.getString(allPlaylistsCursor.getColumnIndex(MediaStore.Audio.Playlists.NAME));
                 int playlistID = allPlaylistsCursor.getInt(allPlaylistsCursor.getColumnIndex(MediaStore.Audio.Playlists._ID));
 
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Name: " + playlistName);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "ID: " + playlistID);
+                Log.d("Playlist Manager", "Name: " + playlistName);
+                Log.d("Playlist Manager", "ID: " + playlistID);
 
                 if (!allAppPlaylists.add(new Playlist(playlistName, playlistID))) {
-                    Log.e("com.example.qian.cs446project.PlaylistManager", "Could not add playlist " + playlistName + " with ID: " + playlistID);
+                    Log.e("Playlist Manager", "Could not add playlist " + playlistName + " with ID: " + playlistID);
                     allPlaylistsCursor.close();
                     return null;
                 }
@@ -89,7 +89,7 @@ public class PlaylistManager {
         }
 
         // Return appropriate value.
-        Log.d("com.example.qian.cs446project.PlaylistManager", "END LIST ALL PLAYLISTS");
+        Log.d("Playlist Manager", "END LIST ALL PLAYLISTS");
         return allAppPlaylists;
     }
 
@@ -97,7 +97,7 @@ public class PlaylistManager {
     // object's songs variable with the queried song data, and returns the com.example.qian.cs446project.Playlist object's updated songs
     // variable.
     public static LinkedList<Song> listAllPlaylistSongs(Context ctx, Playlist pl) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START LIST ALL PLAYLIST SONGS");
+        Log.d("Playlist Manager", "START LIST ALL PLAYLIST SONGS");
 
         // Get playlist URI and put all playlist songs into Cursor object.
         Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external", pl.getPlaylistID());
@@ -116,15 +116,15 @@ public class PlaylistManager {
                 String filePath = playlistSongsCursor.getString(playlistSongsCursor.getColumnIndex(MediaStore.Audio.Playlists.Members.DATA));
                 int id = playlistSongsCursor.getInt(playlistSongsCursor.getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID));
 
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Title: " + title);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Album: " + album);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Artist: " + artist);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "Duration: " + duration);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "File Path: " + filePath);
-                Log.d("com.example.qian.cs446project.PlaylistManager", "ID: " + id);
+                Log.d("Playlist Manager", "Title: " + title);
+                Log.d("Playlist Manager", "Album: " + album);
+                Log.d("Playlist Manager", "Artist: " + artist);
+                Log.d("Playlist Manager", "Duration: " + duration);
+                Log.d("Playlist Manager", "File Path: " + filePath);
+                Log.d("Playlist Manager", "ID: " + id);
 
                 if (!pl.songs.add(new Song(title, album, artist, duration, filePath, id))) {
-                    Log.e("com.example.qian.cs446project.PlaylistManager", "Could not add song " + title + " with ID: " + id);
+                    Log.e("Playlist Manager", "Could not add song " + title + " with ID: " + id);
                     playlistSongsCursor.close();
                     pl.songs = null;
                     return null;
@@ -135,14 +135,14 @@ public class PlaylistManager {
         }
 
         // Return appropriate value.
-        Log.d("com.example.qian.cs446project.PlaylistManager", "END LIST ALL PLAYLIST SONGS");
+        Log.d("Playlist Manager", "END LIST ALL PLAYLIST SONGS");
         return pl.songs;
     }
 
     // createPlaylist creates a new playlist on the device with the given name and returns a com.example.qian.cs446project.Playlist object
     // representing the newly created playlist.
     public static Playlist createPlaylist(Context ctx, String playlistName) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START CREATE PLAYLIST");
+        Log.d("Playlist Manager", "START CREATE PLAYLIST");
 
         // Initialize playlist values.
         ContentValues contentValuesPlaylist = new ContentValues();
@@ -152,16 +152,16 @@ public class PlaylistManager {
         // Create playlist and retrieve its ID.
         Uri playlistURI = ctx.getContentResolver().insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, contentValuesPlaylist);
         if (playlistURI == null) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "An error occurred creating playlist " + playlistName);
+            Log.e("Playlist Manager", "An error occurred creating playlist " + playlistName);
             return null;
         }
         Cursor playlistIDCursor = ctx.getContentResolver().query(playlistURI, new String[]{MediaStore.Audio.Playlists._ID}, null, null, null);
         if (playlistIDCursor == null) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "An error occurred creating playlist " + playlistName);
+            Log.e("Playlist Manager", "An error occurred creating playlist " + playlistName);
             return null;
         }
         if (playlistIDCursor.getCount() != 1) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "An error occurred creating playlist " + playlistName);
+            Log.e("Playlist Manager", "An error occurred creating playlist " + playlistName);
             return null;
         }
         playlistIDCursor.moveToFirst();
@@ -169,14 +169,14 @@ public class PlaylistManager {
         playlistIDCursor.close();
 
         // Return appropriate value.
-        Log.d("com.example.qian.cs446project.PlaylistManager", "END CREATE PLAYLIST");
+        Log.d("Playlist Manager", "END CREATE PLAYLIST");
         return new Playlist(playlistName, id);
     }
 
     // deletePlaylist deletes the given playlist from the device and nullifies the given com.example.qian.cs446project.Playlist object. The
     // returned Boolean value indicates a success (true) or failure (false).
     public static Boolean deletePlaylist(Context ctx, Playlist pl) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START DELETE PLAYLIST");
+        Log.d("Playlist Manager", "START DELETE PLAYLIST");
 
         // Retrieve all app playlists with the given playlist ID and places them into a Cursor object.
         Cursor allAppPlaylistsCursor = ctx.getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, MediaStore.Audio.Playlists._ID + " = '" + pl.getPlaylistID() + "'", null, null);
@@ -193,12 +193,12 @@ public class PlaylistManager {
 
         // Deletion failure if number of deleted playlists is not 1.
         if (numOfDeletedPlaylists != 1) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "An error occurred deleting playlist " + pl.getPlaylistName() + " and " + numOfDeletedPlaylists + " were deleted");
+            Log.e("Playlist Manager", "An error occurred deleting playlist " + pl.getPlaylistName() + " and " + numOfDeletedPlaylists + " were deleted");
             return false;
         }
 
         // Return appropriate value.
-        Log.d("com.example.qian.cs446project.PlaylistManager", "END DELETE PLAYLIST");
+        Log.d("Playlist Manager", "END DELETE PLAYLIST");
         pl.close();
         return true;
     }
@@ -207,7 +207,7 @@ public class PlaylistManager {
     // object's songs attribute with the provided song as well. The returned Boolean value indicates a success
     // (true) or failure (false).
     public static Boolean addSongToPlaylist(Context ctx, Playlist pl, Song s) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START ADD SONG");
+        Log.d("Playlist Manager", "START ADD SONG");
 
         // Retrieve number of songs in playlist. Required to ensure new songs are added to end of playlist.
         final int previousPlaylistSongCount = getPlaylistSongCount(ctx, pl.getPlaylistID());
@@ -224,13 +224,13 @@ public class PlaylistManager {
 
         // Error if new song count is not 1 greater than old song count.
         if (previousPlaylistSongCount != currentPlaylistSongCount - 1) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "com.example.qian.cs446project.Song " + s.getTitle() + " with ID " + s.getLocalDeviceFileID() + "could not be added to playlist " + pl.getPlaylistName() + " with ID " + pl.getPlaylistID());
+            Log.e("Playlist Manager", "com.example.qian.cs446project.Song " + s.getTitle() + " with ID " + s.getLocalDeviceFileID() + "could not be added to playlist " + pl.getPlaylistName() + " with ID " + pl.getPlaylistID());
         }
 
         // Return appropriate value.
-        Log.d("com.example.qian.cs446project.PlaylistManager", "END ADD SONG");
+        Log.d("Playlist Manager", "END ADD SONG");
         if (!pl.songs.add(s)) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "Failed to add song " + s.getTitle() + " with ID " + s.getLocalDeviceFileID() + " to playlist object " + pl.getPlaylistName() + " with ID " + pl.getPlaylistID());
+            Log.e("Playlist Manager", "Failed to add song " + s.getTitle() + " with ID " + s.getLocalDeviceFileID() + " to playlist object " + pl.getPlaylistName() + " with ID " + pl.getPlaylistID());
         }
         return true;
     }
@@ -239,7 +239,7 @@ public class PlaylistManager {
     // from the provided com.example.qian.cs446project.Playlist object as well. The returned Boolean value indicates a success (true) or failure
     // (false).
     public static Boolean removeSongFromPlaylist(Context ctx, Playlist pl, Song s) {
-        Log.d("com.example.qian.cs446project.PlaylistManager", "START REMOVE SONG");
+        Log.d("Playlist Manager", "START REMOVE SONG");
 
         // Retrieve playlist URI and delete song from the playlist.
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", pl.getPlaylistID());
@@ -247,12 +247,12 @@ public class PlaylistManager {
 
         // Ensure correct number of songs was deleted.
         if (deletionCount != 1) {
-            Log.e("com.example.qian.cs446project.PlaylistManager", "Deletion failure of song " + s.getTitle() + "with ID " + s.getLocalDeviceFileID() + " from playlist " + pl.getPlaylistName() + " with ID " + pl.getPlaylistID());
+            Log.e("Playlist Manager", "Deletion failure of song " + s.getTitle() + "with ID " + s.getLocalDeviceFileID() + " from playlist " + pl.getPlaylistName() + " with ID " + pl.getPlaylistID());
             return false;
         }
 
         // Return appropriate value.
-        Log.d("com.example.qian.cs446project.PlaylistManager", "END REMOVE SONG");
+        Log.d("Playlist Manager", "END REMOVE SONG");
         return true;
     }
 

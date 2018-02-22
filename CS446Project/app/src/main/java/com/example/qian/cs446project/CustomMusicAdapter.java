@@ -1,7 +1,6 @@
 package com.example.qian.cs446project;
 
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +37,7 @@ public class CustomMusicAdapter extends BaseAdapter {
     private ArrayList<TextView> elapsedTimes = new ArrayList<>();
     private ArrayList<TextView> remainingTimes = new ArrayList<>();
     private HashMap<Integer, View> displayedSongs = new HashMap<>();
-    private static final TimeFormatter timeFormatter = new TimeFormatter();
+    private static final CS446Utils cs446Utils = new CS446Utils();
 
     public CustomMusicAdapter(Context context, int layout, Playlist playlist) {
         this.context = context;
@@ -90,7 +89,7 @@ public class CustomMusicAdapter extends BaseAdapter {
             viewHolder.artist.setText(viewHolder.artist.getText() + song.getArtist());
             viewHolder.album.setText(viewHolder.album.getText() + song.getAlbum());
             viewHolder.songProgressBar.setMax(song.getDuration());
-            viewHolder.remainingTime.setText("-" + timeFormatter.formatTime(song.getDuration()));
+            viewHolder.remainingTime.setText("-" + cs446Utils.formatTime(song.getDuration()));
             convertView.setTag(viewHolder);
             displayedSongs.put(position, convertView);
         } else {
