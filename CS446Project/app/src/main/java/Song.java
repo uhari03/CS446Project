@@ -7,13 +7,15 @@ public class Song {
     private String album;
     private String artist;
     private String filePath;
+    private int duration;
     private int localDeviceFileID;
 
     // Constructor simply assigns given values to class attributes.
-    public Song(String title, String album, String artist, String filePath, int localDeviceFileID) {
+    public Song(String title, String album, String artist, int duration, String filePath, int localDeviceFileID) {
         this.title = title;
         this.album = album;
         this.artist = artist;
+        this.duration = duration;
         this.filePath = filePath;
         this.localDeviceFileID = localDeviceFileID;
     }
@@ -30,19 +32,15 @@ public class Song {
         return artist;
     }
 
+    public int getDuration() {
+        return duration;
+    }
+
     public String getFilePath() {
         return filePath;
     }
 
     public int getLocalDeviceFileID() {
         return localDeviceFileID;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public void setLocalDeviceFileID(int localDeviceFileID) {
-        this.localDeviceFileID = localDeviceFileID;
     }
 }

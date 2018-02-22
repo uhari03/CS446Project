@@ -24,4 +24,10 @@ public class Playlist {
     public int getPlaylistID() {
         return playlistID;
     }
+
+    public void close() {
+        songs = null;
+        playlistName = null;
+        playlistID = -1;
+    }
 }
