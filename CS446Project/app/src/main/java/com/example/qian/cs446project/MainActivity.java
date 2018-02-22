@@ -1,18 +1,17 @@
 package com.example.qian.cs446project;
 
+import android.content.BroadcastReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-<<<<<<< HEAD
 import android.view.View;
 import android.widget.TextView;
 
 import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
 import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
 
-import org.w3c.dom.Text;
-
 public class MainActivity extends AppCompatActivity {
     BaseConnectionManager connectionManager;
+    BroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         connectionManager = new WifiConnectionManager(this, this);
+        broadcastReceiver = connectionManager.getBroadcastReceiver();
     }
 
     public void initSession (View view) {
@@ -34,16 +34,3 @@ public class MainActivity extends AppCompatActivity {
         textView.setText("Started searching for service!\n");
     }
 }
-
-
-=======
-
-public class MainActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
-}
->>>>>>> origin/APBdev-Workspace

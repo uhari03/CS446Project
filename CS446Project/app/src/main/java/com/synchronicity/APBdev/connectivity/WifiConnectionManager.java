@@ -22,7 +22,6 @@ import java.util.Map;
  */
 
 public class WifiConnectionManager extends BaseConnectionManager {
-
     //Fields
     Context context;
     Activity activity;
@@ -38,10 +37,12 @@ public class WifiConnectionManager extends BaseConnectionManager {
         this.channel = manager.initialize(context, context.getMainLooper(), null);
     }
 
+
     @Override
     public void sendData(){
         return;
     }
+
 
     @Override
     public void receiveData() {
@@ -75,10 +76,12 @@ public class WifiConnectionManager extends BaseConnectionManager {
         this.registerForNSD(serviceName, serviceProtocol, sessionName);
     }
 
+
     @Override
     public void joinSession() {
         this.findServices();
     }
+
 
     // Methods for Network Service Discovery (NSD).
     private void registerForNSD(String serviceName, String serviceProtocol, String sessionName) {
@@ -97,21 +100,18 @@ public class WifiConnectionManager extends BaseConnectionManager {
             @Override
             public void onSuccess() {
                 // Use for actions when the service is successfully registered.
-                String message = "Hooray, we registered for NSD!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Hooray, we registered for NSD!\n");
             }
 
             @Override
             public void onFailure(int reason) {
                 // Use for actions when the service is NOT successfully registered.
-                String message = "Oh no, we failed to register for NSD!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Oh no, we failed to register for NSD!\n");
             }
         };
         this.manager.addLocalService(channel, serviceInfo, actionListener);
     }
+
 
     private void findServices () {
         WifiP2pManager.DnsSdServiceResponseListener serviceListener = new WifiP2pManager.DnsSdServiceResponseListener() {
@@ -119,9 +119,8 @@ public class WifiConnectionManager extends BaseConnectionManager {
             public void onDnsSdServiceAvailable(String instanceName, String registrationType, WifiP2pDevice srcDevice) {
                 // Check for our app here. Could this discovery be an echo of our own broadcast?
                 // If not our own broadcast, get some info about the broadcast and give it the user to select a room?
-                String message = "Checking for services: Service found!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Checking for services: Service found!\n");
+                screenDebug("Instance Name: " + instanceName);
             }
         };
         WifiP2pManager.DnsSdTxtRecordListener textListener = new WifiP2pManager.DnsSdTxtRecordListener() {
@@ -131,47 +130,47 @@ public class WifiConnectionManager extends BaseConnectionManager {
                     Get information about the service from the text record. Probably store the name
                     of the rooms and the person that you can connect with.
                  */
-                String message = "Check for text records: Text record found!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Check for text records: Text record found!\n");
+                screenDebug("Session name: " + txtRecordMap.get("sessionName"));
             }
         };
+        this.manager.setDnsSdResponseListeners(this.channel, serviceListener, textListener);
+
         // Use this in this.manager.addServiceRequest.
         WifiP2pManager.ActionListener addServiceActionListener = new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                String message = "Check if service request added: Service added!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Check if service request added: Service added!\n");
             }
 
             @Override
             public void onFailure(int reason) {
-                String message = "Check if service request added: Service NOT added!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
-            }
+                screenDebug("Check if service request added: Service NOT added!\n");
+             }
         };
+        WifiP2pServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        this.manager.addServiceRequest(this.channel, serviceRequest, addServiceActionListener);
+
         // Use this in this.manager.discoverServices.
         WifiP2pManager.ActionListener discoverServiceActionListener = new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                String message = "Service discovery initiated!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Service discovery initiated!\n");
             }
 
             @Override
             public void onFailure(int reason) {
-                String message = "Failed to initiate service discovery!\n";
-                TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
-                textView.append(message);
+                screenDebug("Failed to initiate service discovery!\n");
+
             }
         };
-        WifiP2pServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
-        this.manager.setDnsSdResponseListeners(this.channel, serviceListener, textListener);
-        this.manager.addServiceRequest(this.channel, serviceRequest, addServiceActionListener);
         this.manager.discoverServices(this.channel, discoverServiceActionListener);
+    }
+
+
+    private void screenDebug(String message) {
+        TextView textView = WifiConnectionManager.this.activity.findViewById(R.id.logBox);
+        textView.append(message);
     }
 
 
@@ -202,6 +201,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
         return intentFilter;
     }
 
+
     private class WcmBroadcastReceiver extends BroadcastReceiver {
         private WcmBroadcastReceiver() {
             super();
@@ -216,6 +216,13 @@ public class WifiConnectionManager extends BaseConnectionManager {
                     If wifi is enabled, everything is good, continue as normal ?
                     If wifi is disabled, notify user and cleanup any outstanding connections ?
                  */
+                 int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
+                 if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+                     screenDebug("Wifi p2p enabled...\n");
+                 } else {
+                     screenDebug("Wifi p2p NOT enabled!");
+                 }
+
             } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
                 // Call WifiP2pManager.requestPeers() to get a list of current peers
                 /*
@@ -231,9 +238,11 @@ public class WifiConnectionManager extends BaseConnectionManager {
                 /*
                     Similar to WIFI_P2P_STATE_CHANGED_ACTION ?
                  */
+                screenDebug("Something about the device changed...");
             }
         }
     }
+
 
     private class WcmIntentFilter extends IntentFilter {
         private WcmIntentFilter () {
