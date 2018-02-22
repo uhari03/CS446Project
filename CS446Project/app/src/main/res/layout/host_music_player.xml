@@ -34,26 +34,35 @@
             android:layout_height="50dp"
             android:onClick="onStop" />
 
-        <Button
+        <ImageView
             android:id="@+id/muteTogglingButton"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
             android:layout_toEndOf="@id/stopButton"
             android:layout_toRightOf="@id/stopButton"
-            android:layout_width="100dp"
+            android:src="@drawable/mute"
+            android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="@string/mute"
             android:onClick="onToggleMute" />
+
+        <Button
+            android:id="@+id/end_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/muteTogglingButton"
+            android:layout_toRightOf="@id/muteTogglingButton"
+            android:layout_marginTop="10dp"
+            android:text="@string/end_session" />
 
         <TextView
             android:id="@+id/waitMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/muteTogglingButton"
-            android:layout_toRightOf="@id/muteTogglingButton"
+            android:layout_toEndOf="@id/end_session"
+            android:layout_toRightOf="@id/end_session"
             android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
-            android:text="@string/wait_message"
+            android:text="@string/ready_to_play"
             android:textSize="15sp"
             android:textColor="#000000" />
 

@@ -8,9 +8,39 @@
     <string name="join_session">Join Session</string>
     <string name="manage_playlist">Manage Playlist</string>
     <string name="mute">Mute</string>
-    <string name="loading">Loading...</string>
-    <string name="wait_message">Ready to play</string>
-    <string name="create_session">Create Session</string>
-    <string name="join_session">Join Session</string>
-    <string name="manage_playlist">Manage Playlist</string>
+    <string name="end_session">End Session</string>
+    <string name="leave_session">Leave Session</string>
+    <!--Host's session playlist GUI (screen 6 of mockup) shows this string after all participants
+    have finished downloading the 1st song in the session playlist.-->
+    <string name="ready_to_play">Ready to play</string>
+    <!--Host's session playlist GUI (screen 6 of mockup) shows this string when a participant joins
+    a session.-->
+    <string name="wait_message">Please wait for new participants to download files.</string>
+    <!--Name of the parcelable extra that is the Playlist used when creating an instance of
+    HostMusicPlayer or ParticipantMusicPlayer-->
+    <string name="session_playlist">playlist</string>
+    <!--String for the broadcasted Intent that HostMusicPlayer receives to indicate that a new
+    participant has joined the session-->
+    <string name="participant_joined">new_participant_joined</string>
+    <!--String for the broadcasted Intent that HostMusicPlayer receives to indicate that all
+    participants have finished downloading at least the 1st song in the session playlist-->
+    <string name="all_participants_ready">all_participants_ready</string>
+    <!--String for the Intent that HostMusicPlayer broadcasts to tell other components that the
+    session playlist is currently stopped (i.e. the session playlist is not playing nor paused)-->
+    <string name="playlist_stopped">playlist_stopped</string>
+    <!--String for the Intent that HostMusicPlayer broadcasts to tell other components that the
+    session playlist is currently not stopped (i.e. the session playlist is playing or paused)-->
+    <string name="playlist_not_stopped">playlist_not_stopped</string>
+    <!--String for the Intent that HostMusicPlayer broadcasts to tell other components that the
+    host has pressed Play on the session playlist-->
+    <string name="play">play</string>
+    <!--String for the Intent that HostMusicPlayer broadcasts to tell other components that the
+    host has paused the session playlist-->
+    <string name="pause">pause</string>
+    <!--String for the Intent that HostMusicPlayer broadcasts to tell other components that the
+    host has stopped the session playlist-->
+    <string name="stop">stop</string>
+    <!--String for the broadcasted Intent that ParticipantMusicPlayer receives to indicate that the
+    1st song in the session playlist has finished downloading onto the participant's device-->
+    <string name="song_finished_downloading">song_finished_downloading</string>
 </resources>

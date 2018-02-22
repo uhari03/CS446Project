@@ -23,43 +23,32 @@ import java.util.HashMap;
 // implementation only allows the user to play, pause, and stop an entire playlist, I do not
 // include these buttons in this class. Instead, I use a similar idea to show for each song a
 // progress bar, the elapsed time, and the remaining time.
-// - This class in the tutorial only has 1 MediaPlayer, whereas I have an ArrayList of MediaPlayers.
-// I implemented the class this way because I need to show the length of each song in the playlist,
-// including songs that have not yet started to play. Therefore, in MainActivity.java's
-// onCreate(Bundle savedInstanceState) method, I create a MediaPlayer for each song in the playlist
-// so that I can find out the duration of each song.
-// - Because MainActivity.java must update a song's progress bar, elapsed time, and remaining time
-// as the song plays, I created ArrayLists for each of these widgets and implemented get methods for
-// them.
-// - In the method getView(int position, View convertView, ViewGroup parent), I only set the widgets
-//  of each ViewHolder once (ViewHolder represents the GUI widgets for a song in the playlist)
-// because songs' file names remain constant and MainActivity.java later updates the progress bar,
-// elapsed time, and remaining time. That is, I only set the widgets of a viewHolder if convertView
-// is null, meaning the GUI widgets for a song have not yet been created and the program is calling
-// getView(int position, View convertView, ViewGroup parent) to create them.
+// - Because HostMusicPlayer.java and ParticipantMusicPlayer.java must update a song's progress bar,
+// elapsed time, and remaining time as the song plays, as well as bold the metadata of the playing
+// song, I created ArrayLists for each of these widgets and implemented get methods for them.
 public class CustomMusicAdapter extends BaseAdapter {
 
     private Context context;
     private int layout;
-    private ArrayList<PlaylistSong> playlistSongs;
-    private MediaPlayer mediaPlayer;
+    private Playlist playlist;
+    private ArrayList<TextView> titles = new ArrayList<>();
+    private ArrayList<TextView> artists = new ArrayList<>();
+    private ArrayList<TextView> albums = new ArrayList<>();
     private ArrayList<SeekBar> songProgressBars = new ArrayList<>();
     private ArrayList<TextView> elapsedTimes = new ArrayList<>();
     private ArrayList<TextView> remainingTimes = new ArrayList<>();
     private HashMap<Integer, View> displayedSongs = new HashMap<>();
     private static final TimeFormatter timeFormatter = new TimeFormatter();
 
-    public CustomMusicAdapter(Context context, int layout, ArrayList<PlaylistSong> playlistSongs,
-                              MediaPlayer mediaPlayer) {
+    public CustomMusicAdapter(Context context, int layout, Playlist playlist) {
         this.context = context;
         this.layout = layout;
-        this.playlistSongs = playlistSongs;
-        this.mediaPlayer = mediaPlayer;
+        this.playlist = playlist;
     }
 
     @Override
     public int getCount() {
-        return playlistSongs.size();
+        return playlist.songs.size();
     }
 
     @Override
@@ -80,34 +69,28 @@ public class CustomMusicAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        PlaylistSong playlistSong = playlistSongs.get(position);
+        Song song = playlist.songs.get(position);
         if (!displayedSongs.containsKey(position)) {
             viewHolder = new ViewHolder();
             LayoutInflater layoutInflater =
                     (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(layout, null);
             viewHolder.title = convertView.findViewById(R.id.title);
+            titles.add(viewHolder.title);
             viewHolder.artist = convertView.findViewById(R.id.artist);
+            artists.add(viewHolder.artist);
             viewHolder.album = convertView.findViewById(R.id.album);
+            albums.add(viewHolder.album);
             viewHolder.songProgressBar = convertView.findViewById(R.id.songProgressBar);
             songProgressBars.add(viewHolder.songProgressBar);
             elapsedTimes.add((TextView) convertView.findViewById(R.id.elapsedTime));
             viewHolder.remainingTime = convertView.findViewById(R.id.remainingTime);
             remainingTimes.add(viewHolder.remainingTime);
-            viewHolder.title.setText(viewHolder.title.getText() + playlistSong.getTitle());
-            viewHolder.artist.setText(viewHolder.artist.getText() + playlistSong.getArtist());
-            viewHolder.album.setText(viewHolder.album.getText() + playlistSong.getAlbum());
-            int currentSongLength = 0;
-            // If an instance of HostMusicPlayer instantiates CustomMusicAdapter, the
-            // HostMusicPlayer will pass a MediaPlayer to CustomMusicAdapter's constructor. An
-            // instance of ParticipantMusicPlayer will pass null because the music files must be
-            // sent to non-host devices before they can create a MediaPlayer instance for those
-            // files.
-            if (mediaPlayer != null) {
-                currentSongLength = mediaPlayer.getDuration();
-            }
-            viewHolder.songProgressBar.setMax(currentSongLength);
-            viewHolder.remainingTime.setText("-" + timeFormatter.formatTime(currentSongLength));
+            viewHolder.title.setText(viewHolder.title.getText() + song.getTitle());
+            viewHolder.artist.setText(viewHolder.artist.getText() + song.getArtist());
+            viewHolder.album.setText(viewHolder.album.getText() + song.getAlbum());
+            viewHolder.songProgressBar.setMax(song.getDuration());
+            viewHolder.remainingTime.setText("-" + timeFormatter.formatTime(song.getDuration()));
             convertView.setTag(viewHolder);
             displayedSongs.put(position, convertView);
         } else {
@@ -126,6 +109,18 @@ public class CustomMusicAdapter extends BaseAdapter {
 
     public ArrayList<TextView> getRemainingTimes() {
         return remainingTimes;
+    }
+
+    public ArrayList<TextView> getTitles() {
+        return titles;
+    }
+
+    public ArrayList<TextView> getArtists() {
+        return artists;
+    }
+
+    public ArrayList<TextView> getAlbums() {
+        return albums;
     }
 
 }

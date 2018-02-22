@@ -14,14 +14,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <Button
+        <ImageView
             android:id="@+id/muteTogglingButton"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
-            android:layout_width="100dp"
+            android:src="@drawable/mute"
+            android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="@string/mute"
             android:onClick="onToggleMute" />
+
+        <Button
+            android:id="@+id/leave_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/muteTogglingButton"
+            android:layout_toRightOf="@id/muteTogglingButton"
+            android:layout_marginTop="10dp"
+            android:text="@string/leave_session" />
 
     </RelativeLayout>
 
