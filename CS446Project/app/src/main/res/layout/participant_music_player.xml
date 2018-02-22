@@ -7,32 +7,21 @@
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:paddingTop="5dp"
-    tools:context="com.example.qian.cs446project.MusicPlayer">
+    tools:context="com.example.qian.cs446project.ParticipantMusicPlayer">
 
     <RelativeLayout
         android:id="@+id/buttonPanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/playPauseButtons"
+        <Button
+            android:id="@+id/muteTogglingButton"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
-            android:src="@drawable/play"
-            android:layout_width="50dp"
+            android:layout_width="100dp"
             android:layout_height="50dp"
-            android:onClick="onTogglePlay" />
-
-        <ImageView
-            android:id="@+id/stopButton"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
-            android:layout_toEndOf="@id/playPauseButtons"
-            android:layout_toRightOf="@id/playPauseButtons"
-            android:src="@drawable/stop"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:onClick="onStop" />
+            android:text="@string/mute"
+            android:onClick="onToggleMute" />
 
     </RelativeLayout>
 
@@ -43,4 +32,5 @@
         android:layout_height="wrap_content">
 
     </ListView>
+
 </RelativeLayout>

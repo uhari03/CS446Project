@@ -1,11 +1,19 @@
 package com.example.qian.cs446project;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
@@ -17,45 +25,86 @@ import java.util.ArrayList;
  * Created by Qian on 2018-02-20.
  */
 
-public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
+public class HostMusicPlayer extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
 
-    private ArrayList<MediaPlayer> mediaPlayers;
+    private MediaPlayer mediaPlayer;
     private ArrayList<PlaylistSong> playlist;
     private int currentSong = 0;
     private Boolean stopped = true;
+    private Boolean muted = false;
     private Boolean movingToNextSong = false;
     private ImageView playPauseButtons;
+    private ImageView stopButton;
+    private Button muteTogglingButton;
+    private TextView waitMessage;
     private SeekBar songProgressBar;
     private int songLength;
     private CustomMusicAdapter customMusicAdapter;
+    private static final TimeFormatter timeFormatter = new TimeFormatter();
 
-    private void createMediaPlayers() {
-        mediaPlayers = new ArrayList<>();
-        for (PlaylistSong playlistSong : playlist) {
-            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),
-                    playlistSong.getUri());
-            mediaPlayer.setOnCompletionListener(this);
-            mediaPlayers.add(mediaPlayer);
-        }
+    private void createMediaPlayer() {
+        mediaPlayer = MediaPlayer.create(getApplicationContext(),
+                    Uri.parse(Environment.getExternalStorageDirectory().getPath() +
+                    playlist.get(currentSong).getFilePath()));
+        mediaPlayer.setOnCompletionListener(this);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.host_music_player);
         ListView listView = findViewById(R.id.songlist);
-        playlist = new ArrayList<>();
-        playlist.add(new PlaylistSong("The New Black Gold", R.raw.the_new_black_gold));
-        playlist.add(new PlaylistSong("Sovngarde Song", R.raw.sovngarde_song));
-        playlist.add(new PlaylistSong("Commander Shepard", R.raw.commander_shepard));
-        playlist.add(new PlaylistSong("Big Ten", R.raw.big_ten));
-        playlist.add(new PlaylistSong("Sweet L.A.", R.raw.sweet_l_a));
-        createMediaPlayers();
-        customMusicAdapter =
-                new CustomMusicAdapter(this, R.layout.song, playlist, mediaPlayers);
-        listView.setAdapter(customMusicAdapter);
+        // The HostMusicPlayer activity represents screen 6 in the mockup. A playlist is passed to
+        // the HostMusicPlayer activity to represent the session playlist. Each song in the
+        // playlist has the following metadata:
+        // - Path to the music file
+        // - Title
+        // - Artist
+        // - Album
+        // The object passed in the parcel is some sort of list where each element represents a
+        // song.
+        playlist = getIntent().getParcelableExtra("playlist");
         currentSong = 0;
+        muteTogglingButton = findViewById(R.id.muteTogglingButton);
+        createMediaPlayer();
+        customMusicAdapter =
+                new CustomMusicAdapter(this, R.layout.song, playlist, mediaPlayer);
+        listView.setAdapter(customMusicAdapter);
         playPauseButtons = findViewById(R.id.playPauseButtons);
+        stopButton = findViewById(R.id.stopButton);
+        waitMessage = findViewById(R.id.waitMessage);
+        IntentFilter waitForDownload = new IntentFilter();
+        // When a user joins a session, the play, pause, and stop buttons should be disabled for the
+        // host because the new participant needs time to receive and download at least the 1st
+        // song in the playlist.
+        waitForDownload.addAction("new_participant_joined");
+        // When all participants have finished downloading at least the 1st song in the playlist,
+        // the host's play, pause, and stop buttons should be enabled.
+        waitForDownload.addAction("all_participants_ready");
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                hostMusicPlayerReceiver, waitForDownload
+        );
+    }
+
+    private BroadcastReceiver hostMusicPlayerReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals("new_participant_joined")) {
+                playPauseButtons.setEnabled(false);
+                stopButton.setEnabled(false);
+                waitMessage.setText("Please wait for new participants to download files.");
+            } else {
+                playPauseButtons.setEnabled(true);
+                stopButton.setEnabled(true);
+                waitMessage.setText("Ready to play");
+            }
+        }
+    };
+
+    private void broadcastIntent(String intentName) {
+        Intent intentToBroadcast = new Intent(intentName);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intentToBroadcast);
     }
 
     // Ke Qiao Chen: I based this method on viewHolder.ivPlay's OnClickListener in
@@ -71,20 +120,19 @@ public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnComp
     //  has not yet begun.
     public void onTogglePlay(View v) {
         if (stopped) {
-            createMediaPlayers();
             currentSong = 0;
-            songLength = mediaPlayers.get(currentSong).getDuration();
+            createMediaPlayer();
+            songLength = mediaPlayer.getDuration();
             // Thread to update the song progress bar, elapsed time, and remaining time
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    MediaPlayer currentMediaPlayer = null;
-                    while (!stopped && currentSong < mediaPlayers.size() &&
-                            (currentMediaPlayer = mediaPlayers.get(currentSong)) != null) {
+                    MediaPlayer currentMediaPlayer;
+                    while (!stopped && currentSong < playlist.size() && mediaPlayer != null) {
                         try {
                             if (!movingToNextSong) {
                                 Message message = new Message();
-                                message.what = currentMediaPlayer.getCurrentPosition();
+                                message.what = mediaPlayer.getCurrentPosition();
                                 handler.sendMessage(message);
                                 Thread.sleep(1000);
                             }
@@ -94,28 +142,25 @@ public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnComp
                     }
                 }
             }).start();
+            // At least in the prototype, we might want to prevent users from joining a session
+            // while a session playlist is playing or paused. MusicPlayer broadcasts an intent when
+            // the host starts the session playlist and another when the host stops the session
+            // playlist or the playlist finishes. As a result, other components know when they
+            // should prevent users from joining a session.
+            broadcastIntent("playlist-not-stopped");
             stopped = false;
         }
-        if (mediaPlayers.get(currentSong).isPlaying()) {
-            mediaPlayers.get(currentSong).pause();
+        if (mediaPlayer.isPlaying()) {
+            // Broadcast an intent for all participants to pause the playlist.
+            broadcastIntent("pause");
+            mediaPlayer.pause();
             playPauseButtons.setImageResource(R.drawable.play);
         } else {
-            mediaPlayers.get(currentSong).start();
+            // Broadcast an intent for all participants to play the playlist.
+            broadcastIntent("play");
+            mediaPlayer.start();
             playPauseButtons.setImageResource(R.drawable.pause);
         }
-    }
-
-    // Ke Qiao Chen: I based this method on the createTimeLabel(int time) method shown in
-    // https://www.youtube.com/watch?v=zCYQBIcePaw at 13:47
-    public String formatTime(int timeInMilliseconds) {
-        int minutes = timeInMilliseconds / 1000 / 60;
-        int seconds = timeInMilliseconds / 1000 % 60;
-        String formattedTime = "" + minutes + ":";
-        if (seconds < 10) {
-            formattedTime += "0";
-        }
-        formattedTime += seconds;
-        return formattedTime;
     }
 
     // Ke Qiao Chen: I based this method on https://www.youtube.com/watch?v=zCYQBIcePaw at 14:14
@@ -130,22 +175,25 @@ public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnComp
             songProgressBar = customMusicAdapter.getSongProgressBars().get(currentSong);
             songProgressBar.setProgress(currentPosition);
             // Update elapsed time and remaining time.
-            String elapsedTimeValue = formatTime(currentPosition);
+            String elapsedTimeValue = timeFormatter.formatTime(currentPosition);
             TextView elapsedTime = customMusicAdapter.getElapsedTimes().get(currentSong);
             elapsedTime.setText(elapsedTimeValue);
             TextView remainingTime = customMusicAdapter.getRemainingTimes().get(currentSong);
-            String remainingTimeValue = formatTime(songLength - currentPosition);
+            String remainingTimeValue =
+                    timeFormatter.formatTime(songLength - currentPosition);
             remainingTime.setText("-" + remainingTimeValue);
         }
     };
 
     private void resetPlaylist() {
+        broadcastIntent("playlist-stopped");
         stopped = true;
-        for (int i = 0; i < mediaPlayers.size(); ++i) {
+        for (int i = 0; i < playlist.size(); ++i) {
             customMusicAdapter.getSongProgressBars().get(i).setProgress(0);
-            customMusicAdapter.getElapsedTimes().get(i).setText(formatTime(0));
+            customMusicAdapter.getElapsedTimes().get(i)
+                    .setText(timeFormatter.formatTime(0));
             customMusicAdapter.getRemainingTimes().get(i).
-                    setText("-" + formatTime(mediaPlayers.get(i).getDuration()));
+                    setText("-" + timeFormatter.formatTime(playlist.get(i).getDuration()));
         }
         playPauseButtons.setImageResource(R.drawable.play);
     }
@@ -159,8 +207,20 @@ public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnComp
     // not include these widgets.
     public void onStop(View v) {
         if (!stopped) {
-            mediaPlayers.get(currentSong).stop();
+            mediaPlayer.stop();
             resetPlaylist();
+        }
+    }
+
+    public void onToggleMute(View v) {
+        if (muted) {
+            mediaPlayer.setVolume(1, 1);
+            muteTogglingButton.setText("Mute");
+            muted = false;
+        } else {
+            mediaPlayer.setVolume(0, 0);
+            muteTogglingButton.setText("Unmute");
+            muted = true;
         }
     }
 
@@ -181,8 +241,8 @@ public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnComp
         ++currentSong;
         if (currentSong < playlist.size()) {
             songProgressBar = customMusicAdapter.getSongProgressBars().get(currentSong);
-            songLength = mediaPlayers.get(currentSong).getDuration();
-            mediaPlayers.get(currentSong).start();
+            songLength = mediaPlayer.getDuration();
+            mediaPlayer.start();
         } else {
             resetPlaylist();
         }
@@ -193,10 +253,8 @@ public class MusicPlayer extends AppCompatActivity implements MediaPlayer.OnComp
     protected void onDestroy() {
         super.onDestroy();
         stopped = true;
-        for (MediaPlayer mediaPlayer : mediaPlayers) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
+        mediaPlayer.release();
+        mediaPlayer = null;
     }
 
 }

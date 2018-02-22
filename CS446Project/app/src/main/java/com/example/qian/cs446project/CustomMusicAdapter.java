@@ -42,19 +42,19 @@ public class CustomMusicAdapter extends BaseAdapter {
     private Context context;
     private int layout;
     private ArrayList<PlaylistSong> playlistSongs;
-    private ArrayList<MediaPlayer> mediaPlayers = new ArrayList<>();
+    private MediaPlayer mediaPlayer;
     private ArrayList<SeekBar> songProgressBars = new ArrayList<>();
     private ArrayList<TextView> elapsedTimes = new ArrayList<>();
     private ArrayList<TextView> remainingTimes = new ArrayList<>();
-    private MusicPlayer musicPlayer = new MusicPlayer();
     private HashMap<Integer, View> displayedSongs = new HashMap<>();
+    private static final TimeFormatter timeFormatter = new TimeFormatter();
 
     public CustomMusicAdapter(Context context, int layout, ArrayList<PlaylistSong> playlistSongs,
-                              ArrayList<MediaPlayer> mediaPlayers) {
+                              MediaPlayer mediaPlayer) {
         this.context = context;
         this.layout = layout;
         this.playlistSongs = playlistSongs;
-        this.mediaPlayers = mediaPlayers;
+        this.mediaPlayer = mediaPlayer;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class CustomMusicAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
-        TextView textFileName, remainingTime;
+        TextView title, artist, album, remainingTime;
         SeekBar songProgressBar;
     }
 
@@ -86,16 +86,28 @@ public class CustomMusicAdapter extends BaseAdapter {
             LayoutInflater layoutInflater =
                     (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(layout, null);
-            viewHolder.textFileName = convertView.findViewById(R.id.fileName);
+            viewHolder.title = convertView.findViewById(R.id.title);
+            viewHolder.artist = convertView.findViewById(R.id.artist);
+            viewHolder.album = convertView.findViewById(R.id.album);
             viewHolder.songProgressBar = convertView.findViewById(R.id.songProgressBar);
             songProgressBars.add(viewHolder.songProgressBar);
             elapsedTimes.add((TextView) convertView.findViewById(R.id.elapsedTime));
             viewHolder.remainingTime = convertView.findViewById(R.id.remainingTime);
             remainingTimes.add(viewHolder.remainingTime);
-            viewHolder.textFileName.setText(playlistSong.getFileName());
-            int currentSongLength = mediaPlayers.get(position).getDuration();
+            viewHolder.title.setText(viewHolder.title.getText() + playlistSong.getTitle());
+            viewHolder.artist.setText(viewHolder.artist.getText() + playlistSong.getArtist());
+            viewHolder.album.setText(viewHolder.album.getText() + playlistSong.getAlbum());
+            int currentSongLength = 0;
+            // If an instance of HostMusicPlayer instantiates CustomMusicAdapter, the
+            // HostMusicPlayer will pass a MediaPlayer to CustomMusicAdapter's constructor. An
+            // instance of ParticipantMusicPlayer will pass null because the music files must be
+            // sent to non-host devices before they can create a MediaPlayer instance for those
+            // files.
+            if (mediaPlayer != null) {
+                currentSongLength = mediaPlayer.getDuration();
+            }
             viewHolder.songProgressBar.setMax(currentSongLength);
-            viewHolder.remainingTime.setText("-" + musicPlayer.formatTime(currentSongLength));
+            viewHolder.remainingTime.setText("-" + timeFormatter.formatTime(currentSongLength));
             convertView.setTag(viewHolder);
             displayedSongs.put(position, convertView);
         } else {

@@ -1,8 +1,13 @@
 <resources>
     <string name="app_name">CS 446 Project</string>
-    <string name="file_name">File name here</string>
+    <string name="title">Title: </string>
+    <string name="artist">Artist: </string>
+    <string name="album">Album: </string>
     <string name="time_placeholder">0:00</string>
     <string name="create_session">Create Session</string>
     <string name="join_session">Join Session</string>
     <string name="manage_playlist">Manage Playlist</string>
+    <string name="mute">Mute</string>
+    <string name="loading">Loading...</string>
+    <string name="wait_message">Ready to play</string>
 </resources>

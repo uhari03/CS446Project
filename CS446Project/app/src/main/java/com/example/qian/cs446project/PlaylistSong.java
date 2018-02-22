@@ -1,31 +1,42 @@
 package com.example.qian.cs446project;
 
-import android.widget.SeekBar;
-
 /**
  * Created by Qian on 2018-02-15.
  */
 
-// Ke Qiao Chen: I based this class on the class shown in
-// https://github.com/quocnguyenvan/media-player-demo/blob/master/app/src/main/java/com/quocnguyen/mediaplayerdemo/Music.java
-// and made the following change:
-// - The variable that I named "uri" is named "song" in the tutorial. I named this variable "uri"
-// because the value that I set it to is the uri for the song that the PlaylistSong instance
-// represents.
 public class PlaylistSong {
 
-    private String fileName;
-    private int uri;
+    private String filePath;
+    private String title;
+    private String artist;
+    private String album;
+    private int duration;
 
-    public PlaylistSong(String fileName, int uri) {
-        this.fileName = fileName;
-        this.uri = uri;
+    public PlaylistSong(String filePath, String title, String artist, String album, int duration) {
+        this.filePath = filePath;
+        this.title = title;
+        this.artist = artist;
+        this.album = album;
+        this.duration = duration;
     }
 
-    public String getFileName() { return fileName; }
-
-    public int getUri() {
-        return uri;
+    public String getFilePath() {
+        return filePath;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
 }
