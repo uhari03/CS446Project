@@ -10,4 +10,7 @@
     <string name="mute">Mute</string>
     <string name="loading">Loading...</string>
     <string name="wait_message">Ready to play</string>
+    <string name="create_session">Create Session</string>
+    <string name="join_session">Join Session</string>
+    <string name="manage_playlist">Manage Playlist</string>
 </resources>
