@@ -80,7 +80,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
         createMediaPlayer();
-        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_GUI, playlist);
+        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_gui, playlist);
         listView.setAdapter(customMusicAdapter);
         playPauseButtons = findViewById(R.id.imageViewPlayPauseButtons);
         stopButton = findViewById(R.id.imageViewStopButton);

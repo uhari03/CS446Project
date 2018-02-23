@@ -60,7 +60,7 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         playlist = getIntent().getParcelableExtra(applicationContext.getString(R.string.session_playlist));
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
-        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_GUI, playlist);
+        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_gui, playlist);
         listView.setAdapter(customMusicAdapter);
         IntentFilter participantIntentFilter = new IntentFilter();
         // When the 1st song in the session playlist finishes downloading onto the participant's
