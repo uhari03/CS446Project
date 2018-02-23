@@ -8,15 +8,15 @@
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:paddingTop="5dp"
-    tools:context="com.example.qian.cs446project.HostMusicPlayer">
+    tools:context="com.example.qian.cs446project.HostMusicPlayerActivity">
 
     <RelativeLayout
-        android:id="@+id/buttonPanel"
+        android:id="@+id/relativeLayoutButtonPanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/playPauseButtons"
+            android:id="@+id/imageViewPlayPauseButtons"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
             app:srcCompat="@android:drawable/ic_media_play"
@@ -26,22 +26,22 @@
             android:onClick="onTogglePlay" />
 
         <ImageView
-            android:id="@+id/stopButton"
+            android:id="@+id/imageViewStopButton"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
-            android:layout_toEndOf="@id/playPauseButtons"
-            android:layout_toRightOf="@id/playPauseButtons"
+            android:layout_toEndOf="@id/imageViewPlayPauseButtons"
+            android:layout_toRightOf="@id/imageViewPlayPauseButtons"
             android:src="@drawable/stop"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:onClick="onStop" />
 
         <ImageView
-            android:id="@+id/muteTogglingButton"
+            android:id="@+id/imageViewMuteTogglingButton"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
-            android:layout_toEndOf="@id/stopButton"
-            android:layout_toRightOf="@id/stopButton"
+            android:layout_toEndOf="@id/imageViewStopButton"
+            android:layout_toRightOf="@id/imageViewStopButton"
             app:srcCompat="@android:drawable/ic_lock_silent_mode"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -49,20 +49,20 @@
             android:onClick="onToggleMute" />
 
         <Button
-            android:id="@+id/end_session"
+            android:id="@+id/buttonEndSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/muteTogglingButton"
-            android:layout_toRightOf="@id/muteTogglingButton"
+            android:layout_toEndOf="@id/imageViewMuteTogglingButton"
+            android:layout_toRightOf="@id/imageViewMuteTogglingButton"
             android:layout_marginTop="10dp"
             android:text="@string/end_session" />
 
         <TextView
-            android:id="@+id/waitMessage"
+            android:id="@+id/textViewWaitMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/end_session"
-            android:layout_toRightOf="@id/end_session"
+            android:layout_toEndOf="@id/buttonEndSession"
+            android:layout_toRightOf="@id/buttonEndSession"
             android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
             android:text="@string/ready_to_play"
@@ -72,8 +72,8 @@
     </RelativeLayout>
 
     <ListView
-        android:id="@+id/songlist"
-        android:layout_below="@id/buttonPanel"
+        android:id="@+id/listViewSonglist"
+        android:layout_below="@id/relativeLayoutButtonPanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
