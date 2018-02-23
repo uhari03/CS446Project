@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingBottom="5dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp"
+    tools:context="com.example.qian.cs446project.ParticipantMusicPlayer">
+
+    <RelativeLayout
+        android:id="@+id/buttonPanel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/muteTogglingButton"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            app:srcCompat="@android:drawable/ic_lock_silent_mode"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@android:color/black"
+            android:onClick="onToggleMute" />
+
+        <Button
+            android:id="@+id/leave_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/muteTogglingButton"
+            android:layout_toRightOf="@id/muteTogglingButton"
+            android:layout_marginTop="10dp"
+            android:text="@string/leave_session" />
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/songlist"
+        android:layout_below="@id/buttonPanel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+</RelativeLayout>
