@@ -163,12 +163,12 @@ public class HostMusicPlayer extends AppCompatActivity implements MediaPlayer.On
             // Broadcast an intent for all participants to pause the playlist.
             broadcastIntent(applicationContext.getString(R.string.pause));
             mediaPlayer.pause();
-            playPauseButtons.setImageResource(R.drawable.play);
+            playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
         } else {
             // Broadcast an intent for all participants to play the playlist.
             broadcastIntent(applicationContext.getString(R.string.play));
             mediaPlayer.start();
-            playPauseButtons.setImageResource(R.drawable.pause);
+            playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
         }
     }
 
@@ -228,7 +228,7 @@ public class HostMusicPlayer extends AppCompatActivity implements MediaPlayer.On
             customMusicAdapter.getRemainingTimes().get(i).
                     setText("-" + cs446Utils.formatTime(playlist.songs.get(i).getDuration()));
         }
-        playPauseButtons.setImageResource(R.drawable.play);
+        playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
     }
 
     // Ke Qiao Chen: I based this method on viewHolder.ivStop's OnClickListener in
@@ -250,11 +250,11 @@ public class HostMusicPlayer extends AppCompatActivity implements MediaPlayer.On
     public void onToggleMute(View v) {
         if (muted) {
             mediaPlayer.setVolume(1, 1);
-            muteTogglingButton.setImageResource(R.drawable.mute);
+            muteTogglingButton.setImageResource(android.R.drawable.ic_lock_silent_mode);
             muted = false;
         } else {
             mediaPlayer.setVolume(0, 0);
-            muteTogglingButton.setImageResource(R.drawable.unmute);
+            muteTogglingButton.setImageResource(android.R.drawable.ic_lock_silent_mode_off);
             muted = true;
         }
     }

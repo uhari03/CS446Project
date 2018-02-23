@@ -54,7 +54,7 @@ public class PlaylistManager {
         }
 
         // Return appropriate value.
-        Log.d("PlaylistManger", "END LIST ALL SONGS");
+        Log.d("Playlist Manager", "END LIST ALL SONGS");
         return allDeviceSongs;
     }
 

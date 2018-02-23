@@ -204,11 +204,11 @@ public class ParticipantMusicPlayer extends AppCompatActivity
     public void onToggleMute(View v) {
         if (muted) {
             mediaPlayer.setVolume(1, 1);
-            muteTogglingButton.setImageResource(R.drawable.mute);
+            muteTogglingButton.setImageResource(android.R.drawable.ic_lock_silent_mode);
             muted = false;
         } else {
             mediaPlayer.setVolume(0, 0);
-            muteTogglingButton.setImageResource(R.drawable.unmute);
+            muteTogglingButton.setImageResource(android.R.drawable.ic_lock_silent_mode_off);
             muted = true;
         }
     }
