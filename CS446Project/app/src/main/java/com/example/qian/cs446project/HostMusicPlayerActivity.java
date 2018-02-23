@@ -74,8 +74,8 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.host_music_player);
         ListView listView = findViewById(R.id.listViewSonglist);
-        // The HostMusicPlayerActivity activity represents screen 6 in the mockup. A Playlist is passed to
-        // the HostMusicPlayerActivity activity to represent the session playlist.
+        // The HostMusicPlayerActivity activity represents screen 6 in the mockup. A Playlist is
+        // passed to the HostMusicPlayerActivity activity to represent the session playlist.
         playlist = getIntent().getParcelableExtra(applicationContext.getString(R.string.session_playlist));
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
@@ -99,7 +99,8 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     }
 
     private void broadcastIntent(String intentName) {
-        Intent intentToBroadcast = new Intent(intentName);
+        Intent intentToBroadcast =
+                new Intent(applicationContext.getString(R.string.domain_name) + intentName);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intentToBroadcast);
     }
 

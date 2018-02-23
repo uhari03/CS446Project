@@ -41,6 +41,8 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     private CustomMusicAdapter customMusicAdapter;
     private static final CS446Utils cs446Utils = new CS446Utils();
     private Context applicationContext = getApplicationContext();
+    private ListView listView;
+    private TextView waitMessage;
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
@@ -53,15 +55,10 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.participant_music_player);
-        ListView listView = findViewById(R.id.listViewSonglist);
-        // The ParticipantMusicPlayerActivity activity represents screen 3 in the mockup. A Playlist
-        // is passed to the ParticipantMusicPlayerActivity activity to represent the session
-        // playlist.
-        playlist = getIntent().getParcelableExtra(applicationContext.getString(R.string.session_playlist));
+        listView = findViewById(R.id.listViewSonglist);
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
-        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_gui, playlist);
-        listView.setAdapter(customMusicAdapter);
+        waitMessage = findViewById(R.id.textViewWaitForSongs);
         IntentFilter participantIntentFilter = new IntentFilter();
         // When the 1st song in the session playlist finishes downloading onto the participant's
         // device, it creates a MediaPlayer with that song.
@@ -76,6 +73,9 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         // When the host stops the session playlist, the session playlist should stop on the
         // the participant's device.
         participantIntentFilter.addAction(applicationContext.getString(R.string.stop));
+        // When the metadata for all songs in the session playlist is available for the
+        // participant, ParticipantMusicPlayerActivity populates its ListView with those songs.
+        participantIntentFilter.addAction(applicationContext.getString(R.string.playlist_ready));
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 ParticipantMusicPlayerReceiver, participantIntentFilter
         );
@@ -233,6 +233,14 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
                 mediaPlayer.pause();
             } else if (action.equals(applicationContext.getString(R.string.stop))) {
                 stop();
+            } else if (action.equals(applicationContext.getString(R.string.playlist_ready))) {
+                playlist = intent.getParcelableExtra(applicationContext
+                        .getString(R.string.session_playlist_metadata));
+                customMusicAdapter =
+                        new CustomMusicAdapter(ParticipantMusicPlayerActivity.this,
+                                R.layout.song_in_gui, playlist);
+                listView.setAdapter(customMusicAdapter);
+                waitMessage.setVisibility(View.INVISIBLE);
             }
         }
     };

@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">CS 446 Project</string>
+    <!--The domain name, followed by a dot, must be appended at the beginning of the action name for
+    any custom Intent that the app broadcasts.-->
+    <string name="domain_name">com.example.qian.cs446project.</string>
     <string name="title">Title: </string>
     <string name="artist">Artist: </string>
     <string name="album">Album: </string>
@@ -10,6 +13,9 @@
     <string name="mute">Mute</string>
     <string name="end_session">End Session</string>
     <string name="leave_session">Leave Session</string>
+    <string name="exit">Exit</string>
+    <string name="session_name_placeholder">Session Name</string>
+    <string name="join">Join</string>
     <!--Host's session playlist GUI (screen 6 of mockup) shows this string after all participants
     have finished downloading the song in the session playlist.-->
     <string name="ready_to_play">Ready to play</string>
@@ -43,4 +49,31 @@ HostMusicPlayerActivity or ParticipantMusicPlayerActivity-->
     <!--String for the broadcasted Intent ParticipantMusicPlayerActivity receives to indicate that
     the 1st song in the session playlist has finished downloading onto the participant's device-->
     <string name="song_finished_downloading">song_finished_downloading</string>
+    <!--Name of the Intent SessionListAdapter broadcasts to tell other components that a user has
+    chosen a session to join-->
+    <string name="user_chose_session">user_chose_session</string>
+    <!--Name of the extra that the user_chose_session Intent contains. This extra is the name of the
+    session that the user has chosen to join.-->
+    <string name="name_of_chosen_session">name_of_chosen_session</string>
+    <!--Name of the parcelable extra that is the list of sessions used when creating an instance of
+    ChooseSessionActivity-->
+    <string name="session_list">session_list</string>
+    <!--Participant's session playlist GUI (screen 3 of mockup) shows this string before the app
+    loads the metadata of the songs in the playlist.-->
+    <string name="waiting_for_songs">Loading songs...</string>
+    <!--Name of the broadcasted Intent ParticipantMusicPlayerActivity receives that contains the
+    Playlist object with the metadata for all songs in the session playlist-->
+    <string name="playlist_ready">playlist_ready</string>
+    <!--Name of the extra that the playlist_ready Intent contains that is the Playlist object
+    representing the session playlist.-->
+    <string name="session_playlist_metadata">session_playlist_metadata</string>
+    <!--Name of the broadcasted Intent ChooseSessionActivity receives that contains the ArrayList
+    of Strings, which lists the name of every session that the user can join.-->
+    <string name="session_list_ready">session_list_ready</string>
+    <!--Name of the extra that the session_list_ready Intent contains that is the ArrayList of
+    Strings, listing the name of every session that the user can join.-->
+    <string name="session_names_list">session_names_list</string>
+    <!--The GUI that lists all sessions a user can join (screen 2 of mockup) shows this string
+    before ChooseSessionActivity receives the list of session names.-->
+    <string name="waiting_for_session_names">Retrieving sessions...</string>
 </resources>
