@@ -12,51 +12,51 @@ each song, whereas I do not. -->
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/musicIcon"
+        android:id="@+id/imageViewMusicIcon"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/music" />
     
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/title"
         android:textSize="15sp"
         android:textColor="#000000"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/musicIcon"
-        android:layout_toEndOf="@+id/musicIcon" />
+        android:layout_toRightOf="@+id/imageViewMusicIcon"
+        android:layout_toEndOf="@+id/imageViewMusicIcon" />
 
     <TextView
-        android:id="@+id/artist"
+        android:id="@+id/textViewArtist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/artist"
         android:textSize="15sp"
         android:textColor="#000000"
-        android:layout_below="@id/title"
-        android:layout_toRightOf="@+id/musicIcon"
-        android:layout_toEndOf="@+id/musicIcon" />
+        android:layout_below="@id/textViewTitle"
+        android:layout_toRightOf="@+id/imageViewMusicIcon"
+        android:layout_toEndOf="@+id/imageViewMusicIcon" />
 
     <TextView
-        android:id="@+id/album"
+        android:id="@+id/textViewAlbum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/album"
         android:textSize="15sp"
         android:textColor="#000000"
-        android:layout_below="@id/artist"
-        android:layout_toRightOf="@+id/musicIcon"
-        android:layout_toEndOf="@+id/musicIcon" />
+        android:layout_below="@id/textViewArtist"
+        android:layout_toRightOf="@+id/imageViewMusicIcon"
+        android:layout_toEndOf="@+id/imageViewMusicIcon" />
 
     <SeekBar
-        android:id="@+id/songProgressBar"
+        android:id="@+id/seekBarSongProgressBar"
         android:layout_width="275dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/album"
-        android:layout_toEndOf="@id/elapsedTime"
-        android:layout_toRightOf="@id/elapsedTime"
+        android:layout_below="@id/textViewAlbum"
+        android:layout_toEndOf="@id/textViewElapsedTime"
+        android:layout_toRightOf="@id/textViewElapsedTime"
         android:layout_marginStart="2dp"
         android:layout_marginLeft="2dp"
         android:layout_marginEnd="2dp"
@@ -64,10 +64,10 @@ each song, whereas I do not. -->
         android:max="100" />
 
     <TextView
-        android:id="@+id/elapsedTime"
+        android:id="@+id/textViewElapsedTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/album"
+        android:layout_below="@id/textViewAlbum"
         android:layout_marginStart="5dp"
         android:layout_marginLeft="5dp"
         android:text="@string/time_placeholder"
@@ -75,12 +75,12 @@ each song, whereas I do not. -->
         android:textColor="#000000" />
 
     <TextView
-        android:id="@+id/remainingTime"
+        android:id="@+id/textViewRemainingTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/songProgressBar"
-        android:layout_toRightOf="@id/songProgressBar"
-        android:layout_below="@id/album"
+        android:layout_toEndOf="@id/seekBarSongProgressBar"
+        android:layout_toRightOf="@id/seekBarSongProgressBar"
+        android:layout_below="@id/textViewAlbum"
         android:text="@string/time_placeholder"
         android:textSize="12sp"
         android:textColor="#000000" />

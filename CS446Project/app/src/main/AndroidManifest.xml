@@ -27,8 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HostMusicPlayer"></activity>
-        <activity android:name=".ParticipantMusicPlayer"></activity>
+        <activity android:name=".HostMusicPlayerActivity"></activity>
+        <activity android:name=".ParticipantMusicPlayerActivity"></activity>
     </application>
 
 </manifest>

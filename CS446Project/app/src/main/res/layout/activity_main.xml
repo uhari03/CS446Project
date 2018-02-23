@@ -10,16 +10,16 @@
     tools:context="com.example.qian.cs446project.MainActivity">
 
     <Button
-        android:id="@+id/create_session"
+        android:id="@+id/buttonCreateSession"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/join_session"
+        android:layout_below="@+id/buttonJoinSession"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="106dp"
         android:text="@string/create_session" />
 
     <Button
-        android:id="@+id/join_session"
+        android:id="@+id/buttonJoinSession"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -28,7 +28,7 @@
         android:text="@string/join_session" />
 
     <Button
-        android:id="@+id/manage_playlist"
+        android:id="@+id/buttonManagePlaylist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

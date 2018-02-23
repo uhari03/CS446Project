@@ -8,15 +8,15 @@
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:paddingTop="5dp"
-    tools:context="com.example.qian.cs446project.ParticipantMusicPlayer">
+    tools:context="com.example.qian.cs446project.ParticipantMusicPlayerActivity">
 
     <RelativeLayout
-        android:id="@+id/buttonPanel"
+        android:id="@+id/relativeLayoutButtonPanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/muteTogglingButton"
+            android:id="@+id/imageViewMuteTogglingButton"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
             app:srcCompat="@android:drawable/ic_lock_silent_mode"
@@ -26,19 +26,19 @@
             android:onClick="onToggleMute" />
 
         <Button
-            android:id="@+id/leave_session"
+            android:id="@+id/buttonLeaveSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/muteTogglingButton"
-            android:layout_toRightOf="@id/muteTogglingButton"
+            android:layout_toEndOf="@id/imageViewMuteTogglingButton"
+            android:layout_toRightOf="@id/imageViewMuteTogglingButton"
             android:layout_marginTop="10dp"
             android:text="@string/leave_session" />
 
     </RelativeLayout>
 
     <ListView
-        android:id="@+id/songlist"
-        android:layout_below="@id/buttonPanel"
+        android:id="@+id/listViewSonglist"
+        android:layout_below="@id/relativeLayoutButtonPanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 

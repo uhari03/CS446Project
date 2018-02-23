@@ -25,7 +25,7 @@ import java.io.IOException;
  * Created by Qian on 2018-02-21.
  */
 
-public class ParticipantMusicPlayer extends AppCompatActivity
+public class ParticipantMusicPlayerActivity extends AppCompatActivity
         implements MediaPlayer.OnCompletionListener {
 
     private MediaPlayer mediaPlayer;
@@ -53,14 +53,14 @@ public class ParticipantMusicPlayer extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.participant_music_player);
-        ListView listView = findViewById(R.id.songlist);
-        // The ParticipantMusicPlayer activity represents screen 3 in the mockup. A Playlist is
-        // passed to the ParticipantMusicPlayer activity to represent the session playlist.
-        playlist = getIntent()
-                .getParcelableExtra(applicationContext.getString(R.string.session_playlist));
+        ListView listView = findViewById(R.id.listViewSonglist);
+        // The ParticipantMusicPlayerActivity activity represents screen 3 in the mockup. A Playlist
+        // is passed to the ParticipantMusicPlayerActivity activity to represent the session
+        // playlist.
+        playlist = getIntent().getParcelableExtra(applicationContext.getString(R.string.session_playlist));
         currentSong = 0;
-        muteTogglingButton = findViewById(R.id.muteTogglingButton);
-        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song, playlist);
+        muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
+        customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_GUI, playlist);
         listView.setAdapter(customMusicAdapter);
         IntentFilter participantIntentFilter = new IntentFilter();
         // When the 1st song in the session playlist finishes downloading onto the participant's
@@ -90,13 +90,16 @@ public class ParticipantMusicPlayer extends AppCompatActivity
         public void handleMessage(Message msg) {
             int currentPosition = msg.what;
             // Update the song progress bar.
-            songProgressBar = customMusicAdapter.getSongProgressBars().get(currentSong);
+            songProgressBar =
+                    customMusicAdapter.getSongsInGUI().get(currentSong).getSongProgressBar();
             songProgressBar.setProgress(currentPosition);
             // Update elapsed time and remaining time.
             String elapsedTimeValue = cs446Utils.formatTime(currentPosition);
-            TextView elapsedTime = customMusicAdapter.getElapsedTimes().get(currentSong);
+            TextView elapsedTime =
+                    customMusicAdapter.getSongsInGUI().get(currentSong).getElapsedTime();
             elapsedTime.setText(elapsedTimeValue);
-            TextView remainingTime = customMusicAdapter.getRemainingTimes().get(currentSong);
+            TextView remainingTime =
+                    customMusicAdapter.getSongsInGUI().get(currentSong).getRemainingTime();
             String remainingTimeValue =
                     cs446Utils.formatTime(songLength - currentPosition);
             remainingTime.setText("-" + remainingTimeValue);
@@ -125,27 +128,32 @@ public class ParticipantMusicPlayer extends AppCompatActivity
         currentSong = 0;
         setMediaPlayerToCurrentSong();
         for (int i = 0; i < playlist.songs.size(); ++i) {
-            customMusicAdapter.getSongProgressBars().get(i).setProgress(0);
-            customMusicAdapter.getElapsedTimes().get(i)
+            customMusicAdapter.getSongsInGUI().get(i).getSongProgressBar().setProgress(0);
+            customMusicAdapter.getSongsInGUI().get(i).getElapsedTime()
                     .setText(cs446Utils.formatTime(0));
-            customMusicAdapter.getRemainingTimes().get(i).
-                    setText("-" + cs446Utils.formatTime(playlist.songs.get(i).getDuration()));
+            customMusicAdapter.getSongsInGUI().get(i).getRemainingTime()
+                    .setText("-" + cs446Utils.formatTime(playlist.songs.get(i).getDuration()));
         }
     }
 
     private void unboldPreviousSongMetadata() {
         if (previousSong >= 0) {
-            customMusicAdapter.getTitles().get(previousSong).setTypeface(null, Typeface.NORMAL);
-            customMusicAdapter.getArtists()
-                    .get(previousSong).setTypeface(null, Typeface.NORMAL);
-            customMusicAdapter.getAlbums().get(previousSong).setTypeface(null, Typeface.NORMAL);
+            customMusicAdapter.getSongsInGUI().get(previousSong).getTitle()
+                    .setTypeface(null, Typeface.NORMAL);
+            customMusicAdapter.getSongsInGUI().get(previousSong).getArtist()
+                    .setTypeface(null, Typeface.NORMAL);
+            customMusicAdapter.getSongsInGUI().get(previousSong).getAlbum()
+                    .setTypeface(null, Typeface.NORMAL);
         }
     }
 
     private void boldCurrentSongMetadata() {
-        customMusicAdapter.getTitles().get(currentSong).setTypeface(null, Typeface.BOLD);
-        customMusicAdapter.getArtists().get(currentSong).setTypeface(null, Typeface.BOLD);
-        customMusicAdapter.getAlbums().get(currentSong).setTypeface(null, Typeface.BOLD);
+        customMusicAdapter.getSongsInGUI().get(currentSong).getTitle()
+                .setTypeface(null, Typeface.BOLD);
+        customMusicAdapter.getSongsInGUI().get(currentSong).getArtist()
+                .setTypeface(null, Typeface.BOLD);
+        customMusicAdapter.getSongsInGUI().get(currentSong).getAlbum()
+                .setTypeface(null, Typeface.BOLD);
     }
 
     // Ke Qiao Chen: I based this method on viewHolder.ivPlay's OnClickListener in
@@ -193,7 +201,7 @@ public class ParticipantMusicPlayer extends AppCompatActivity
     // - I do not release the MediaPlayer because it is likely that the user will replay the
     // playlist after stopping it.
     // - I reset each song's progress bar, elapsed time, and remaining time. The tutorial does not
-    // not include these widgets.
+    // include these widgets.
     private void stop() {
         if (!stopped) {
             mediaPlayer.stop();
@@ -237,7 +245,8 @@ public class ParticipantMusicPlayer extends AppCompatActivity
         ++currentSong;
         if (currentSong < playlist.songs.size()) {
             setMediaPlayerToCurrentSong();
-            songProgressBar = customMusicAdapter.getSongProgressBars().get(currentSong);
+            songProgressBar =
+                    customMusicAdapter.getSongsInGUI().get(currentSong).getSongProgressBar();
             songLength = playlist.songs.get(currentSong).getDuration();
             boldCurrentSongMetadata();
             mediaPlayer.start();
