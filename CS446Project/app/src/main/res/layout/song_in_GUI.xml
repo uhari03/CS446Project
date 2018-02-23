@@ -16,7 +16,7 @@ each song, whereas I do not. -->
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/music" />
-    
+
     <TextView
         android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
