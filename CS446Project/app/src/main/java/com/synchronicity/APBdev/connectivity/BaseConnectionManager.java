@@ -13,8 +13,8 @@ public abstract class BaseConnectionManager implements ConnectionManager {
     protected IntentFilter intentFilter = null;
 
     // Methods for common connectivity of ConnectionManager.
-    public abstract void initiateSession();
-    public abstract void joinSession();
+    public abstract void initiateSession(String SessionName);
+    public abstract void joinSession(String sessionName);
     public abstract void cleanUp();
 
     // Common data xfer methods for ConnectionManager.
