@@ -63,7 +63,9 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         ListView listView = findViewById(R.id.listViewSonglist);
         // The HostMusicPlayerActivity activity represents screen 6 in the mockup. A Playlist is
         // passed to the HostMusicPlayerActivity activity to represent the session playlist.
-        playlist = getIntent().getParcelableExtra(applicationContext.getString(R.string.session_playlist));
+        PlaylistParcelable playlistParcelable = getIntent().getParcelableExtra(applicationContext
+                        .getString(R.string.session_playlist));
+        playlist = playlistParcelable.getPlaylist();
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
         applicationContext = getApplicationContext();
@@ -75,8 +77,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         waitMessage = findViewById(R.id.textViewWaitMessage);
         // Broadcast an Intent to tell the app that the user has created a session.
         broadcastIntentWithoutExtras(
-                applicationContext.getString(R.string.session_created), applicationContext,
-                this);
+                applicationContext.getString(R.string.session_created), applicationContext,this);
     }
 
     @Override
@@ -86,20 +87,24 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // When a user joins a session, the Play, Pause, and Stop buttons should be disabled for the
         // host because the new participant needs time to receive and download at least the 1st
         // song in the playlist.
-        waitForDownload.addAction(applicationContext.getString(R.string.participant_joined));
+        waitForDownload.addAction(applicationContext.getString(R.string.domain_name) +
+                applicationContext.getString(R.string.participant_joined));
         // When all participants have finished downloading at least the 1st song in the playlist,
         // the host's Play, Pause, and Stop buttons should be enabled.
-        waitForDownload.addAction(applicationContext.getString(R.string.all_participants_ready));
+        waitForDownload.addAction(applicationContext.getString(R.string.domain_name) +
+                applicationContext.getString(R.string.all_participants_ready));
         hostMusicPlayerReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action.equals(applicationContext.getString(R.string.participant_joined))) {
+                if (action.equals(applicationContext.getString(R.string.domain_name) +
+                        applicationContext.getString(R.string.participant_joined))) {
                     playPauseButtons.setEnabled(false);
                     stopButton.setEnabled(false);
                     waitMessage.setText(applicationContext.getString(R.string.wait_message));
                 } else if (action.
-                        equals(applicationContext.getString(R.string.all_participants_ready))) {
+                        equals(applicationContext.getString(R.string.domain_name) +
+                                applicationContext.getString(R.string.all_participants_ready))) {
                     playPauseButtons.setEnabled(true);
                     stopButton.setEnabled(true);
                     waitMessage.setText(applicationContext.getString(R.string.ready_to_play));
