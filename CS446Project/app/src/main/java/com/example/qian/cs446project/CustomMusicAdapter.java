@@ -11,6 +11,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.example.qian.cs446project.CS446Utils.formatTime;
+
 /**
  * Created by Qian on 2018-02-15.
  */
@@ -33,7 +35,6 @@ public class CustomMusicAdapter extends BaseAdapter {
     private Playlist playlist;
     private ArrayList<ViewHolder> songsInGUI = new ArrayList<>();
     private HashMap<Integer, View> displayedSongs = new HashMap<>();
-    private static final CS446Utils cs446Utils = new CS446Utils();
 
     public CustomMusicAdapter(Context context, int layout, Playlist playlist) {
         this.context = context;
@@ -105,7 +106,7 @@ public class CustomMusicAdapter extends BaseAdapter {
             viewHolder.title.setText(viewHolder.title.getText() + song.getTitle());
             viewHolder.artist.setText(viewHolder.artist.getText() + song.getArtist());
             viewHolder.album.setText(viewHolder.album.getText() + song.getAlbum());
-            viewHolder.remainingTime.setText("-" + cs446Utils.formatTime(song.getDuration()));
+            viewHolder.remainingTime.setText("-" + formatTime(song.getDuration()));
             viewHolder.songProgressBar.setMax(song.getDuration());
             songsInGUI.add(viewHolder);
             convertView.setTag(viewHolder);

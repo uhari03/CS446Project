@@ -21,6 +21,9 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
+import static com.example.qian.cs446project.CS446Utils.broadcastIntentWithoutExtras;
+import static com.example.qian.cs446project.CS446Utils.formatTime;
+
 /**
  * Created by Qian on 2018-02-20.
  */
@@ -42,8 +45,9 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     private SeekBar songProgressBar;
     private int songLength;
     private CustomMusicAdapter customMusicAdapter;
-    private static final CS446Utils cs446Utils = new CS446Utils();
-    private Context applicationContext = getApplicationContext();
+    private Context applicationContext;
+    private IntentFilter waitForDownload;
+    private BroadcastReceiver hostMusicPlayerReceiver;
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
@@ -51,23 +55,6 @@ public class HostMusicPlayerActivity extends AppCompatActivity
                     playlist.songs.get(currentSong).getFilePath()));
         mediaPlayer.setOnCompletionListener(this);
     }
-
-    private BroadcastReceiver hostMusicPlayerReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(applicationContext.getString(R.string.participant_joined))) {
-                playPauseButtons.setEnabled(false);
-                stopButton.setEnabled(false);
-                waitMessage.setText(applicationContext.getString(R.string.wait_message));
-            } else if (action.equals(applicationContext.getString(R.string.all_participants_ready)))
-            {
-                playPauseButtons.setEnabled(true);
-                stopButton.setEnabled(true);
-                waitMessage.setText(applicationContext.getString(R.string.ready_to_play));
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +66,23 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         playlist = getIntent().getParcelableExtra(applicationContext.getString(R.string.session_playlist));
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
+        applicationContext = getApplicationContext();
         createMediaPlayer();
         customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_gui, playlist);
         listView.setAdapter(customMusicAdapter);
         playPauseButtons = findViewById(R.id.imageViewPlayPauseButtons);
         stopButton = findViewById(R.id.imageViewStopButton);
         waitMessage = findViewById(R.id.textViewWaitMessage);
-        IntentFilter waitForDownload = new IntentFilter();
+        // Broadcast an Intent to tell the app that the user has created a session.
+        broadcastIntentWithoutExtras(
+                applicationContext.getString(R.string.session_created), applicationContext,
+                this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        waitForDownload = new IntentFilter();
         // When a user joins a session, the Play, Pause, and Stop buttons should be disabled for the
         // host because the new participant needs time to receive and download at least the 1st
         // song in the playlist.
@@ -93,15 +90,25 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // When all participants have finished downloading at least the 1st song in the playlist,
         // the host's Play, Pause, and Stop buttons should be enabled.
         waitForDownload.addAction(applicationContext.getString(R.string.all_participants_ready));
+        hostMusicPlayerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (action.equals(applicationContext.getString(R.string.participant_joined))) {
+                    playPauseButtons.setEnabled(false);
+                    stopButton.setEnabled(false);
+                    waitMessage.setText(applicationContext.getString(R.string.wait_message));
+                } else if (action.
+                        equals(applicationContext.getString(R.string.all_participants_ready))) {
+                    playPauseButtons.setEnabled(true);
+                    stopButton.setEnabled(true);
+                    waitMessage.setText(applicationContext.getString(R.string.ready_to_play));
+                }
+            }
+        };
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 hostMusicPlayerReceiver, waitForDownload
         );
-    }
-
-    private void broadcastIntent(String intentName) {
-        Intent intentToBroadcast =
-                new Intent(applicationContext.getString(R.string.domain_name) + intentName);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intentToBroadcast);
     }
 
     private void unboldPreviousSongMetadata() {
@@ -163,17 +170,18 @@ public class HostMusicPlayerActivity extends AppCompatActivity
             // intent when the host starts the session playlist and another when the host stops the
             // session playlist or the playlist finishes. As a result, other components know when
             // they should prevent users from joining a session.
-            broadcastIntent(applicationContext.getString(R.string.playlist_not_stopped));
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_not_stopped), applicationContext,
+                    this);
             stopped = false;
         }
         if (mediaPlayer.isPlaying()) {
             // Broadcast an intent for all participants to pause the playlist.
-            broadcastIntent(applicationContext.getString(R.string.pause));
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.pause), applicationContext, this);
             mediaPlayer.pause();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
         } else {
             // Broadcast an intent for all participants to play the playlist.
-            broadcastIntent(applicationContext.getString(R.string.play));
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.play), applicationContext, this);
             mediaPlayer.start();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
         }
@@ -192,14 +200,14 @@ public class HostMusicPlayerActivity extends AppCompatActivity
                     customMusicAdapter.getSongsInGUI().get(currentSong).getSongProgressBar();
             songProgressBar.setProgress(currentPosition);
             // Update elapsed time and remaining time.
-            String elapsedTimeValue = cs446Utils.formatTime(currentPosition);
+            String elapsedTimeValue = formatTime(currentPosition);
             TextView elapsedTime =
                     customMusicAdapter.getSongsInGUI().get(currentSong).getElapsedTime();
             elapsedTime.setText(elapsedTimeValue);
             TextView remainingTime =
                     customMusicAdapter.getSongsInGUI().get(currentSong).getRemainingTime();
             String remainingTimeValue =
-                    cs446Utils.formatTime(songLength - currentPosition);
+                    formatTime(songLength - currentPosition);
             remainingTime.setText("-" + remainingTimeValue);
         }
     };
@@ -222,7 +230,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // the host starts the session playlist and another when the host stops the session
         // playlist or the playlist finishes. As a result, other components know when they
         // should prevent users from joining a session.
-        broadcastIntent(applicationContext.getString(R.string.playlist_stopped));
+        broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_stopped), applicationContext, this);
         if (currentSong < playlist.songs.size()) {
             previousSong = currentSong;
         } else {
@@ -234,9 +242,9 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         for (int i = 0; i < playlist.songs.size(); ++i) {
             customMusicAdapter.getSongsInGUI().get(i).getSongProgressBar().setProgress(0);
             customMusicAdapter.getSongsInGUI().get(i).getElapsedTime()
-                    .setText(cs446Utils.formatTime(0));
+                    .setText(formatTime(0));
             customMusicAdapter.getSongsInGUI().get(i).getRemainingTime()
-                    .setText("-" + cs446Utils.formatTime(playlist.songs.get(i).getDuration()));
+                    .setText("-" + formatTime(playlist.songs.get(i).getDuration()));
         }
         playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
     }
@@ -251,7 +259,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     public void onStop(View v) {
         if (!stopped) {
             // Broadcast an Intent for all participants to stop the playlist.
-            broadcastIntent(applicationContext.getString(R.string.stop));
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.stop), applicationContext, this);
             mediaPlayer.stop();
             resetPlaylist();
         }
@@ -286,6 +294,14 @@ public class HostMusicPlayerActivity extends AppCompatActivity
             resetPlaylist();
         }
         movingToNextSong = false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(hostMusicPlayerReceiver);
+        waitForDownload = null;
+        hostMusicPlayerReceiver = null;
     }
 
     @Override

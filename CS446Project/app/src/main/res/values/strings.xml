@@ -76,4 +76,10 @@ HostMusicPlayerActivity or ParticipantMusicPlayerActivity-->
     <!--The GUI that lists all sessions a user can join (screen 2 of mockup) shows this string
     before ChooseSessionActivity receives the list of session names.-->
     <string name="waiting_for_session_names">Retrieving sessions...</string>
+    <!--Name of the Intent HostMusicPlayerActivity broadcasts to tell other components that a user
+    has finished creating a session-->
+    <string name="session_created">session_created</string>
+    <!--Name of the Intent ChooseSessionActivity broadcasts to tell other components that a user is
+    looking for a session to join-->
+    <string name="user_looking_to_join_session">user_looking_to_join_session</string>
 </resources>

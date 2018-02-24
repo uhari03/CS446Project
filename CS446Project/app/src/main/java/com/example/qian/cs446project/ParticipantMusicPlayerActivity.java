@@ -21,6 +21,8 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
+import static com.example.qian.cs446project.CS446Utils.formatTime;
+
 /**
  * Created by Qian on 2018-02-21.
  */
@@ -39,10 +41,11 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     private SeekBar songProgressBar;
     private int songLength;
     private CustomMusicAdapter customMusicAdapter;
-    private static final CS446Utils cs446Utils = new CS446Utils();
-    private Context applicationContext = getApplicationContext();
+    private Context applicationContext;
     private ListView listView;
     private TextView waitMessage;
+    private IntentFilter participantIntentFilter;
+    private BroadcastReceiver participantMusicPlayerReceiver;
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
@@ -59,7 +62,13 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
         waitMessage = findViewById(R.id.textViewWaitForSongs);
-        IntentFilter participantIntentFilter = new IntentFilter();
+        applicationContext = getApplicationContext();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        participantIntentFilter = new IntentFilter();
         // When the 1st song in the session playlist finishes downloading onto the participant's
         // device, it creates a MediaPlayer with that song.
         participantIntentFilter
@@ -76,8 +85,32 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         // When the metadata for all songs in the session playlist is available for the
         // participant, ParticipantMusicPlayerActivity populates its ListView with those songs.
         participantIntentFilter.addAction(applicationContext.getString(R.string.playlist_ready));
+        participantMusicPlayerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (action.equals(applicationContext.getString(R.string.song_finished_downloading)))
+                {
+                    createMediaPlayer();
+                } else if (action.equals(applicationContext.getString(R.string.play))) {
+                    play();
+                } else if (action.equals(applicationContext.getString(R.string.pause))) {
+                    mediaPlayer.pause();
+                } else if (action.equals(applicationContext.getString(R.string.stop))) {
+                    stop();
+                } else if (action.equals(applicationContext.getString(R.string.playlist_ready))) {
+                    playlist = intent.getParcelableExtra(applicationContext
+                            .getString(R.string.session_playlist_metadata));
+                    customMusicAdapter =
+                            new CustomMusicAdapter(ParticipantMusicPlayerActivity.this,
+                                    R.layout.song_in_gui, playlist);
+                    listView.setAdapter(customMusicAdapter);
+                    waitMessage.setVisibility(View.INVISIBLE);
+                }
+            }
+        };
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                ParticipantMusicPlayerReceiver, participantIntentFilter
+                participantMusicPlayerReceiver, participantIntentFilter
         );
     }
 
@@ -94,14 +127,14 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
                     customMusicAdapter.getSongsInGUI().get(currentSong).getSongProgressBar();
             songProgressBar.setProgress(currentPosition);
             // Update elapsed time and remaining time.
-            String elapsedTimeValue = cs446Utils.formatTime(currentPosition);
+            String elapsedTimeValue = formatTime(currentPosition);
             TextView elapsedTime =
                     customMusicAdapter.getSongsInGUI().get(currentSong).getElapsedTime();
             elapsedTime.setText(elapsedTimeValue);
             TextView remainingTime =
                     customMusicAdapter.getSongsInGUI().get(currentSong).getRemainingTime();
             String remainingTimeValue =
-                    cs446Utils.formatTime(songLength - currentPosition);
+                    formatTime(songLength - currentPosition);
             remainingTime.setText("-" + remainingTimeValue);
         }
     };
@@ -130,9 +163,9 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         for (int i = 0; i < playlist.songs.size(); ++i) {
             customMusicAdapter.getSongsInGUI().get(i).getSongProgressBar().setProgress(0);
             customMusicAdapter.getSongsInGUI().get(i).getElapsedTime()
-                    .setText(cs446Utils.formatTime(0));
+                    .setText(formatTime(0));
             customMusicAdapter.getSongsInGUI().get(i).getRemainingTime()
-                    .setText("-" + cs446Utils.formatTime(playlist.songs.get(i).getDuration()));
+                    .setText("-" + formatTime(playlist.songs.get(i).getDuration()));
         }
     }
 
@@ -221,30 +254,6 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         }
     }
 
-    private BroadcastReceiver ParticipantMusicPlayerReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(applicationContext.getString(R.string.song_finished_downloading))) {
-                createMediaPlayer();
-            } else if (action.equals(applicationContext.getString(R.string.play))) {
-                play();
-            } else if (action.equals(applicationContext.getString(R.string.pause))) {
-                mediaPlayer.pause();
-            } else if (action.equals(applicationContext.getString(R.string.stop))) {
-                stop();
-            } else if (action.equals(applicationContext.getString(R.string.playlist_ready))) {
-                playlist = intent.getParcelableExtra(applicationContext
-                        .getString(R.string.session_playlist_metadata));
-                customMusicAdapter =
-                        new CustomMusicAdapter(ParticipantMusicPlayerActivity.this,
-                                R.layout.song_in_gui, playlist);
-                listView.setAdapter(customMusicAdapter);
-                waitMessage.setVisibility(View.INVISIBLE);
-            }
-        }
-    };
-
     @Override
     public void onCompletion(MediaPlayer mp) {
         movingToNextSong = true;
@@ -262,6 +271,14 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
             resetPlaylist();
         }
         movingToNextSong = false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(participantMusicPlayerReceiver);
+        participantIntentFilter = null;
+        participantMusicPlayerReceiver = null;
     }
 
     @Override
