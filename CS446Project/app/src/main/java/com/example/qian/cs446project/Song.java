@@ -22,6 +22,8 @@ public class Song {
         this.localDeviceFileID = localDeviceFileID;
     }
 
+    public String toString() { return title; }
+
     public String getTitle() {
         return title;
     }
