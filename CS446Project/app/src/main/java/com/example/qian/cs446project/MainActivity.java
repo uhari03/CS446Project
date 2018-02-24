@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button buttonCreateSession = findViewById(R.id.create_session);
+        Button buttonCreateSession = findViewById(R.id.buttonCreateSession);
         buttonCreateSession.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button buttonManagePlaylist = findViewById(R.id.manage_playlist);
+        Button buttonManagePlaylist = findViewById(R.id.buttonManagePlaylist);
         buttonManagePlaylist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
