@@ -76,8 +76,8 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         stopButton = findViewById(R.id.imageViewStopButton);
         waitMessage = findViewById(R.id.textViewWaitMessage);
         // Broadcast an Intent to tell the app that the user has created a session.
-        broadcastIntentWithoutExtras(
-                applicationContext.getString(R.string.session_created), applicationContext,this);
+        broadcastIntentWithoutExtras(applicationContext.getString(R.string.session_created),
+                this);
     }
 
     @Override
@@ -87,27 +87,33 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // When a user joins a session, the Play, Pause, and Stop buttons should be disabled for the
         // host because the new participant needs time to receive and download at least the 1st
         // song in the playlist.
-        waitForDownload.addAction(applicationContext.getString(R.string.domain_name) +
-                applicationContext.getString(R.string.participant_joined));
+        waitForDownload.addAction(applicationContext.getString(R.string.participant_joined));
         // When all participants have finished downloading at least the 1st song in the playlist,
         // the host's Play, Pause, and Stop buttons should be enabled.
-        waitForDownload.addAction(applicationContext.getString(R.string.domain_name) +
-                applicationContext.getString(R.string.all_participants_ready));
+        waitForDownload.addAction(applicationContext.getString(R.string.all_participants_ready));
+        // When the 1st participant joins the session, the connection manager requests the session
+        // playlist from the host.
+        waitForDownload.addAction(applicationContext.getString(R.string.request_session_playlist));
         hostMusicPlayerReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action.equals(applicationContext.getString(R.string.domain_name) +
-                        applicationContext.getString(R.string.participant_joined))) {
+                if (action.equals(applicationContext.getString(R.string.participant_joined))) {
                     playPauseButtons.setEnabled(false);
                     stopButton.setEnabled(false);
                     waitMessage.setText(applicationContext.getString(R.string.wait_message));
-                } else if (action.
-                        equals(applicationContext.getString(R.string.domain_name) +
-                                applicationContext.getString(R.string.all_participants_ready))) {
+                } else if (action
+                        .equals(applicationContext.getString(R.string.all_participants_ready))) {
                     playPauseButtons.setEnabled(true);
                     stopButton.setEnabled(true);
                     waitMessage.setText(applicationContext.getString(R.string.ready_to_play));
+                } else if (action
+                        .equals(applicationContext.getString(R.string.request_session_playlist))) {
+                    PlaylistParcelable playlistParcelable = new PlaylistParcelable(playlist);
+                    Intent returnPlaylistIntent = new Intent(applicationContext
+                            .getString(R.string.return_session_playlist));
+                    returnPlaylistIntent.putExtra(applicationContext
+                            .getString(R.string.session_playlist), playlistParcelable);
                 }
             }
         };
@@ -175,18 +181,21 @@ public class HostMusicPlayerActivity extends AppCompatActivity
             // intent when the host starts the session playlist and another when the host stops the
             // session playlist or the playlist finishes. As a result, other components know when
             // they should prevent users from joining a session.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_not_stopped), applicationContext,
+            broadcastIntentWithoutExtras(
+                    applicationContext.getString(R.string.playlist_not_stopped),
                     this);
             stopped = false;
         }
         if (mediaPlayer.isPlaying()) {
             // Broadcast an intent for all participants to pause the playlist.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.pause), applicationContext, this);
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_pause),
+                    this);
             mediaPlayer.pause();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
         } else {
             // Broadcast an intent for all participants to play the playlist.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.play), applicationContext, this);
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_play),
+                    this);
             mediaPlayer.start();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
         }
@@ -235,7 +244,8 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // the host starts the session playlist and another when the host stops the session
         // playlist or the playlist finishes. As a result, other components know when they
         // should prevent users from joining a session.
-        broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_stopped), applicationContext, this);
+        broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_stopped),
+                this);
         if (currentSong < playlist.songs.size()) {
             previousSong = currentSong;
         } else {
@@ -264,7 +274,8 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     public void onStop(View v) {
         if (!stopped) {
             // Broadcast an Intent for all participants to stop the playlist.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.stop), applicationContext, this);
+            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_stop),
+                    this);
             mediaPlayer.stop();
             resetPlaylist();
         }

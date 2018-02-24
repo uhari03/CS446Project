@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onJoinSession(View v) {
+        // Create a ChooseSessionActivity (screen 2 in mockup).
         Intent joinSessionIntent = new Intent(this, ChooseSessionActivity.class);
         startActivity(joinSessionIntent);
     }

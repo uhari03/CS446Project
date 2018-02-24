@@ -71,14 +71,15 @@ public class SessionListAdapter extends BaseAdapter {
 
                 @Override
                 public void onClick(View v) {
-                    Intent participantJoinedSessionIntent =
-                            new Intent(applicationContext.getString(R.string.domain_name) +
-                                    applicationContext.getString(R.string.user_chose_session));
-                    participantJoinedSessionIntent
-                            .putExtra(applicationContext.getString(R.string.name_of_chosen_session),
-                                    sessionListViewHolder.sessionName.getText());
-                    LocalBroadcastManager.getInstance(context)
-                            .sendBroadcast(participantJoinedSessionIntent);
+                    // Broadcast a targeted Intent to create ParticipantMusicPlayerActivity (screen
+                    // 3 in mockup). This Intent contains the name of the session the user chose to
+                    // join.
+                    Intent chooseSessionIntent =
+                            new Intent(context, ParticipantMusicPlayerActivity.class);
+                    chooseSessionIntent
+                            .putExtra(applicationContext.getString(R.string.session_name),
+                            sessionListViewHolder.sessionName.getText());
+                    context.startActivity(chooseSessionIntent);
                 }
 
             });

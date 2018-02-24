@@ -23,10 +23,8 @@ public class CS446Utils {
         return formattedTime;
     }
 
-    public static void broadcastIntentWithoutExtras(String intentName, Context applicationContext,
-                                 Context broadcastSender) {
-        Intent intentToBroadcast =
-                new Intent(applicationContext.getString(R.string.domain_name) + intentName);
+    public static void broadcastIntentWithoutExtras(String intentName, Context broadcastSender) {
+        Intent intentToBroadcast = new Intent(intentName);
         LocalBroadcastManager.getInstance(broadcastSender).sendBroadcast(intentToBroadcast);
     }
 
