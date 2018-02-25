@@ -99,10 +99,8 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
                 } else if (action.equals(applicationContext.getString(R.string.receive_stop))) {
                     stop();
                 } else if (action.equals(applicationContext.getString(R.string.playlist_ready))) {
-                    PlaylistParcelable playlistParcelable =
-                            intent.getParcelableExtra(applicationContext
-                                    .getString(R.string.session_playlist));
-                    playlist = playlistParcelable.getPlaylist();
+                    playlist = intent.getParcelableExtra(applicationContext
+                            .getString(R.string.session_playlist));
                     customMusicAdapter =
                             new CustomMusicAdapter(ParticipantMusicPlayerActivity.this,
                                     R.layout.song_in_gui, playlist);
@@ -297,8 +295,10 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         stopped = true;
-        mediaPlayer.release();
-        mediaPlayer = null;
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
 }

@@ -8,12 +8,10 @@ import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -108,11 +106,10 @@ public class HostMusicPlayerActivity extends AppCompatActivity
                     waitMessage.setText(applicationContext.getString(R.string.ready_to_play));
                 } else if (action
                         .equals(applicationContext.getString(R.string.request_session_playlist))) {
-                    PlaylistParcelable playlistParcelable = new PlaylistParcelable(playlist);
                     Intent returnPlaylistIntent = new Intent(applicationContext
                             .getString(R.string.return_session_playlist));
                     returnPlaylistIntent.putExtra(applicationContext
-                            .getString(R.string.session_playlist), playlistParcelable);
+                            .getString(R.string.session_playlist), playlist);
                 }
             }
         };
@@ -154,6 +151,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     //  has not yet begun.
     public void onTogglePlay(View v) {
         if (stopped) {
+            stopped = false;
             songLength = playlist.songs.get(currentSong).getDuration();
             unboldPreviousSongMetadata();
             boldCurrentSongMetadata();
@@ -183,7 +181,6 @@ public class HostMusicPlayerActivity extends AppCompatActivity
             broadcastIntentWithoutExtras(
                     applicationContext.getString(R.string.playlist_not_stopped),
                     this);
-            stopped = false;
         }
         if (mediaPlayer.isPlaying()) {
             // Broadcast an intent for all participants to pause the playlist.
@@ -322,8 +319,10 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         stopped = true;
-        mediaPlayer.release();
-        mediaPlayer = null;
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
 }

@@ -8,8 +8,11 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -25,19 +28,26 @@ public class ChooseSessionActivity extends AppCompatActivity {
     private TextView waitMessage;
     private IntentFilter chooseSessionIntentFilter;
     private BroadcastReceiver chooseSessionActivityReceiver;
-    private SessionListAdapter sessionListAdapter;
+    private ArrayAdapter<String> sessionListAdapter;
     private ArrayList<String> sessionNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.choose_session);
-        ListView sessionList = findViewById(R.id.listViewSessionsList);
+        setContentView(R.layout.activity_choose_session);
+        final ListView sessionList = findViewById(R.id.listViewSessionsList);
         waitMessage = findViewById(R.id.textViewWaitForSessionNames);
         applicationContext = getApplicationContext();
-        sessionListAdapter = new SessionListAdapter(this, R.layout.session_in_list,
-                sessionNames);
+        sessionListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sessionNames);
         sessionList.setAdapter(sessionListAdapter);
+        Button buttonJoin = findViewById(R.id.buttonJoin);
+        buttonJoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String selectedSessionName = (String) sessionList.getItemAtPosition(sessionList.getCheckedItemPosition());
+                Toast.makeText(getApplicationContext(), selectedSessionName, Toast.LENGTH_SHORT);
+            }
+        });
         // Broadcast an Intent to tell the app that the user is looking for a session to join.
         broadcastIntentWithoutExtras(
                 applicationContext.getString(R.string.user_looking_to_join_session),

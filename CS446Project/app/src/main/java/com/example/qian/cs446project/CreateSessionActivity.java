@@ -34,15 +34,10 @@ public class CreateSessionActivity extends AppCompatActivity {
                 // Retrieve session name.
                 EditText sessionNameEditText = findViewById(R.id.editTextSessionName);
                 String sessionName = sessionNameEditText.getText().toString();
-                //Toast.makeText(getApplicationContext(), sessionName, Toast.LENGTH_SHORT).show();
 
                 // Retrieve selected playlist object.
                 Playlist selectedPlaylist = (Playlist) listViewSelectPlaylist.getItemAtPosition(listViewSelectPlaylist.getCheckedItemPosition());
-                //Toast.makeText(getApplicationContext(), selectedPlaylist.getPlaylistName(), Toast.LENGTH_SHORT).show();
                 PlaylistManager.listAllPlaylistSongs(getApplicationContext(), selectedPlaylist);
-//                for (Song playlistSong : selectedPlaylist.songs) {
-//                    Toast.makeText(getApplicationContext(), playlistSong.getTitle(), Toast.LENGTH_SHORT).show();
-//                }
                 // Broadcast a targeted Intent to create HostMusicPlayerActivity (screen 6 in
                 // mockup). This Intent contains the name of the session the user created and the
                 // playlist that the user chose for the session.

@@ -22,8 +22,9 @@
         android:id="@+id/listViewSessionsList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="8">
-
+        android:layout_weight="8"
+        android:choiceMode="singleChoice"
+        android:listSelector="@android:color/darker_gray">
     </ListView>
 
     <Button
@@ -33,5 +34,12 @@
         android:text="@string/exit"
         android:layout_weight="1"
         android:onClick="onExitSessionsList" />
+
+    <Button
+        android:id="@+id/buttonJoin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:text="@string/join" />
 
 </LinearLayout>
