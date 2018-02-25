@@ -84,10 +84,6 @@ public class ChooseSessionActivity extends AppCompatActivity {
                 this);
     }
 
-    public void onExitSessionsList(View v) {
-        finish();
-    }
-
     protected void onStop() {
         super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(chooseSessionActivityReceiver);
