@@ -19,6 +19,8 @@ public class Playlist {
         this.playlistID = playlistID;
     }
 
+    public String toString() { return getPlaylistName(); }
+
     public String getPlaylistName() {
         return playlistName;
     }
