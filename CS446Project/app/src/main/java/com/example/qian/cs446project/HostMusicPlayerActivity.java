@@ -57,7 +57,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.host_music_player);
+        setContentView(R.layout.activity_host_music_player);
         ListView listView = findViewById(R.id.listViewSonglist);
         applicationContext = getApplicationContext();
         // The HostMusicPlayerActivity activity represents screen 6 in the mockup. A Playlist is

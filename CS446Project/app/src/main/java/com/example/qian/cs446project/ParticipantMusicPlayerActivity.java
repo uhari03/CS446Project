@@ -57,7 +57,7 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.participant_music_player);
+        setContentView(R.layout.activity_participant_music_player);
         listView = findViewById(R.id.listViewSonglist);
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);

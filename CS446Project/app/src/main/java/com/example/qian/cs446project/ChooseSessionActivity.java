@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -45,7 +44,12 @@ public class ChooseSessionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String selectedSessionName = (String) sessionList.getItemAtPosition(sessionList.getCheckedItemPosition());
-                Toast.makeText(getApplicationContext(), selectedSessionName, Toast.LENGTH_SHORT);
+                Intent chooseSessionIntent = new Intent(ChooseSessionActivity.this,
+                                ParticipantMusicPlayerActivity.class);
+                chooseSessionIntent
+                        .putExtra(applicationContext.getString(R.string.session_name),
+                                selectedSessionName);
+                startActivity(chooseSessionIntent);
             }
         });
         // Broadcast an Intent to tell the app that the user is looking for a session to join.
@@ -66,6 +70,7 @@ public class ChooseSessionActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (action.equals(applicationContext.getString(R.string.session_list_ready))) {
+                    sessionNames.clear();
                     sessionNames.addAll(intent.getStringArrayListExtra(applicationContext
                             .getString(R.string.session_names_list)));
                     sessionListAdapter.notifyDataSetChanged();

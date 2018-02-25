@@ -17,7 +17,6 @@
     <string name="end_session">End Session</string>
     <string name="leave_session">Leave Session</string>
     <string name="exit">Exit</string>
-    <string name="session_name_placeholder">Session Name</string>
     <string name="join">Join</string>
     <!--Host's session playlist GUI (screen 6 of mockup) shows this string after all participants
     have finished downloading the song in the session playlist.-->
