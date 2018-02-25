@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -51,8 +52,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
-                    Uri.parse(Environment.getExternalStorageDirectory().getPath() +
-                    playlist.songs.get(currentSong).getFilePath()));
+                    Uri.parse(playlist.songs.get(currentSong).getFilePath()));
         mediaPlayer.setOnCompletionListener(this);
     }
 
@@ -61,14 +61,13 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.host_music_player);
         ListView listView = findViewById(R.id.listViewSonglist);
+        applicationContext = getApplicationContext();
         // The HostMusicPlayerActivity activity represents screen 6 in the mockup. A Playlist is
         // passed to the HostMusicPlayerActivity activity to represent the session playlist.
-        PlaylistParcelable playlistParcelable = getIntent().getParcelableExtra(applicationContext
+        playlist = getIntent().getParcelableExtra(applicationContext
                         .getString(R.string.session_playlist));
-        playlist = playlistParcelable.getPlaylist();
         currentSong = 0;
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
-        applicationContext = getApplicationContext();
         createMediaPlayer();
         customMusicAdapter = new CustomMusicAdapter(this, R.layout.song_in_gui, playlist);
         listView.setAdapter(customMusicAdapter);
@@ -229,8 +228,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     private void setMediaPlayerToCurrentSong() {
         mediaPlayer.reset();
         try {
-            mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath() +
-                    playlist.songs.get(currentSong).getFilePath());
+            mediaPlayer.setDataSource(playlist.songs.get(currentSong).getFilePath());
             mediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();

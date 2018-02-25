@@ -56,10 +56,8 @@ public class ChooseSessionActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (action.equals(applicationContext.getString(R.string.session_list_ready))) {
-                    SessionNamesListParcelable sessionNamesListParcelable =
-                            intent.getParcelableExtra(applicationContext
-                            .getString(R.string.session_names_list));
-                    sessionNames.addAll(sessionNamesListParcelable.getSessionNamesList());
+                    sessionNames.addAll(intent.getStringArrayListExtra(applicationContext
+                            .getString(R.string.session_names_list)));
                     sessionListAdapter.notifyDataSetChanged();
                     waitMessage.setVisibility(View.INVISIBLE);
                 }

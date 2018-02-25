@@ -93,7 +93,7 @@
     <!--Name of the Intent ChooseSessionActivity broadcasts to tell other components that a user is
     looking for a session to join-->
     <string name="user_looking_to_join_session">&domain_name;user_looking_to_join_session</string>
-    <!--Name of the extra in the targeted Intent that ChooseSessionListActivity sends to
+    <!--Name of the extra in the targeted Intent that ChooseSessionActivity sends to
     ParticipantMusicPlayerActivity. This extra is a String that is the name of the session the
     user has chosen to join.-->
     <string name="session_name">session_name</string>
@@ -112,4 +112,8 @@
     <string name="new_playlist">New Playlist</string>
     <string name="create_playlist">Create Playlist</string>
     <string name="enter_playlist_name">Enter Playlist Name</string>
+    <!--Name of an extra in the targeted Intent that CreateSessionActivity sends to
+    ParticipantMusicPlayerActivity. This extra is a String that is the name of the session the
+    user created.-->
+    <string name="created_session_name">created_session_name</string>
 </resources>
