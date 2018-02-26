@@ -18,8 +18,12 @@ public abstract class BaseConnectionManager implements ConnectionManager {
     public abstract void cleanUp();
 
     // Common data xfer methods for ConnectionManager.
+    /*
     public abstract void sendData();
     public abstract void receiveData();
+    */
+
+    public abstract void sendSig(byte signal);
 
     // BroadcastReceiver and IntentFilter methods.
     public abstract BroadcastReceiver getBroadcastReceiver();

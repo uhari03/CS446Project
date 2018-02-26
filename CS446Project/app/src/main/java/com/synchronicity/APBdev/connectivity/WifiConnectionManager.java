@@ -5,8 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
@@ -14,13 +17,20 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -36,7 +46,8 @@ public class WifiConnectionManager extends BaseConnectionManager {
     private WifiP2pDnsSdServiceInfo serviceInfo;
     private WifiP2pServiceRequest serviceRequest;
     private HashMap<String, HashSet<WifiP2pDevice>> activeSessions;
-    private ServerSocket serverSocket;
+    private HashSet<Socket> openSockets;
+    private int serverPort;
     // Constants for NSD. These should go in an enum later?
     private static final String NSD_SERVICE_INSTANCE_VALUE = "SynchronicityCS446";
     private static final String NSD_SERVICE_PROTOCOL_VALUE = "_presence._tcp";
@@ -45,9 +56,9 @@ public class WifiConnectionManager extends BaseConnectionManager {
     private static final String NSD_RECORD_PORT_ID = "PortNum";
     // Constants for signals. These should go in an enum later?
     private static final int BUFFER_SIZE = 1024;
-    private static final byte SIG_PLAY_CODE = 1;
-    private static final byte SIG_PAUSE_CODE = 2;
-    private static final byte SIG_STOP_CODE = 3;
+    public static final byte SIG_PLAY_CODE = 1;
+    public static final byte SIG_PAUSE_CODE = 2;
+    public static final byte SIG_STOP_CODE = 3;
     private static final byte SIG_HAND_SHAKE = 4;
     // Debug constants
     private final String TAG = "WifiConnectionManager";
@@ -64,177 +75,190 @@ public class WifiConnectionManager extends BaseConnectionManager {
         this.serviceInfo = null;
         this.serviceRequest = null;
         this.activeSessions = new HashMap<String, HashSet<WifiP2pDevice>>();
-        // Things that throw exceptions go here.
-        try {
-            this.serverSocket = new ServerSocket(0);
-        } catch (Exception e) {
-            Log.d(TAG, e.getMessage());
-        }
+        this.openSockets = new HashSet<Socket>();
+        this.serverPort = 0;
+    }
+
+
+    // --- Methods adding to fields that need to be synced. --- //
+
+    public void addOpenSocket(Socket socket) {
+       // synchronized (this.openSockets) {
+            Log.d("AddSocket", "start");
+            openSockets.add(socket);
+            Log.d("AddSocket", "end");
+
+       // }
     }
 
 
     // --- Methods for common data transfer of ConnectionManager. --- //
 
 
-    @Override
-    public void sendData(){
-        return;
-    }
-    @Override
-    public void receiveData() {
-        return;
-    }
-
-    private void acceptSocketConnection () {
+    private void serverSocketAcceptThreadInit() {
         /*
             In a new thread, listen for incoming connections and create a client socket.
             We want the data to be received asynchronously as well, so we put that in its own.
             This should only be called once after the server socket is set up.
         */
-        new Thread(new Runnable () {
-            @Override
-            public void run() {
-                // Poll for incoming connections.
-                ServerSocket serverSocket = WifiConnectionManager.this.serverSocket;
-                while (true) {
-                    Socket clientSocket = null;
-                    try {
-                        // Accept incoming connection, which creates a client socket.
-                        clientSocket = serverSocket.accept();
-                        // Pass the client socket to the handling function.
-                        WifiConnectionManager.this.handleSocketConnection(clientSocket);
-                    } catch (Exception e) {
-                        Log.d(TAG, "SOCKET client socket initialization ... FAILURE.");
-                        Log.d(TAG, e.getMessage());
-                        if (!clientSocket.isClosed()) {
-                            try {
-                                clientSocket.close();
-                            } catch(Exception f) {
-                                Log.d(TAG, "SOCKET client socket close ... FAILURE (This is not good!)");
-                                Log.d(TAG, f.getMessage());
-                            }
+        try {
+            // This needs to be outside the thread so it can update the port value synchronously.
+            final ServerSocket serverSocket = new ServerSocket(WifiConnectionManager.this.serverPort);
+            WifiConnectionManager.this.serverPort = serverSocket.getLocalPort();
+            Log.d("LocalPort", Integer.toString(WifiConnectionManager.this.serverPort));
+            new Thread(new Runnable () {
+                @Override
+                public void run() {
+                    Log.d("ServerInit", "Start");
+                    // Toast.makeText(WifiConnectionManager.this.context, "Server Socket OK!", Toast.LENGTH_SHORT).show();
+                    while (!serverSocket.isClosed()) {
+                        Log.d("ServerInitWhile", "Start");
+                        Socket clientSocket = null;
+                        try {
+                            clientSocket = serverSocket.accept();
+                            Log.d("ServerInitWhile", "after accept");
+                            // Add the socket to our set of open sockets. We can call these later in
+                            // threaded methods to send data. In the mean time we should listen for incoming
+                            // data.
+                            WifiConnectionManager.this.addOpenSocket(clientSocket);
+                            Log.d("ServerInitWhile", "after addOpenSocket");
+                            // Listen for incoming data. Use serverInDataListenThreadInit.
+                        } catch(IOException e) {
+                            Log.d("ClientSocketFailure", e.getMessage());
                         }
-                    } finally {
-                        // Make sure our local reference is nullified.
-                        serverSocket = null;
+                        Log.d("ServerInitWhile", "End");
                     }
+                    Log.d("ServerInit", "End");
                 }
-            }
-        }).start();
+            }).start();
+        } catch (IOException e) {
+            Log.d(TAG, "SERVERSOCKET initializing a thread ... FAILURE.");
+            Log.d(TAG, e.getMessage());
+        }
     }
 
-    private void handleSocketConnection (final Socket clientSocket) {
-        /*
-            Take a client socket that has connected to us and interpret the first few bytes of
-            the signal; Depending on this header information, proceed from there.
-        */
+    /*
+    private void serverInDataListenThreadInit(final Socket clientSocket) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    byte[] header = new byte[1];
-                    int result;
-                    // Get the socket input stream.
-                    InputStream inputStream = clientSocket.getInputStream();
-                    // Get the header info.
-                    result = inputStream.read(header, 0, 1);
-                    if (result == -1) {
-                        Log.d(TAG, "COMMUNICATION header read ... FAILURE.");
-                    } else {
-                        switch(header[0]) {
-                            case WifiConnectionManager.SIG_HAND_SHAKE:
-                                receivedHandshake(inputStream);
-                                break;
-                            case WifiConnectionManager.SIG_PAUSE_CODE:
-                                WifiConnectionManager.this.receivedPauseSig();
-                                break;
-                            case WifiConnectionManager.SIG_PLAY_CODE:
-                                WifiConnectionManager.this.receivedPlaySig();
-                                break;
-                            case WifiConnectionManager.SIG_STOP_CODE:
-                                WifiConnectionManager.this.receivedStopSig();
-                                break;
-                            default:
-                                Log.d(TAG, "COMMUNICATION header read ... ERROR.");
-                                throw new Exception("Oh fudge, we got a signal that doesn't make sense");
-                        }
-                    }
-                } catch(Exception e) {
-                    Log.d(TAG, e.getMessage());
-                } finally {
-                    clientSocket.close();
-                }
+                // Starts a thread that listens for incoming data.
+                // Implement this when we need to send data to the server.
+                // Should use serverInDataHandler.
             }
-        }).start();
+        });
     }
+    private void serverInDataHandler(InputStream inputStream) {
+        // Check for bytes to read.
+        // Implement this for when the server needs to receive info.
+    }
+    */
 
     /*
         Implementation influenced by code example on stackoverflow:
         URL: https://stackoverflow.com/questions/18000093/how-to-marshall-and-unmarshall-a-parcelable-to-a-byte-array-with-help-of-parcel
     */
-    private void receivedHandshake(InputStream inputStream) {
-        byte[] buffer = new byte[WifiConnectionManager.BUFFER_SIZE];
-        byte[] resultArray = null;
-        WifiP2pDevice remoteDevice;
-        Parcelable.Creator remoteDeviceCreator = WifiP2pDevice.CREATOR;
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            int length = inputStream.read(buffer);
-            while (length != -1) {
-                outputStream.write(buffer, 0, length);
+
+
+    private void clientSocketInDataListenThreadInit(final String hostAddress, final int hostPort) {
+        Log.d("ClientListener", "start");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String host = hostAddress;
+                int port = hostPort;
+                Socket remoteSocket = new Socket();
+                try {
+                    remoteSocket.bind(null);
+                    remoteSocket.connect(new InetSocketAddress(host, port), 500);
+                    InputStream inputStream = remoteSocket.getInputStream();
+                    while (!remoteSocket.isClosed()) {
+                        Log.d("ClientListener", "Listening Start");
+                        clientSocketInDataHandler(inputStream);
+                        Log.d("ClientListener", "Listening End");
+                    }
+                } catch(IOException e) {
+                    Log.d(TAG, "COMMUNICATION client data listen thread init ... FAILURE");
+                }
             }
-            resultArray = outputStream.toByteArray();
-            Parcel parcel = Parcel.obtain();
-            parcel.unmarshall(resultArray, 0, resultArray.length);
-            parcel.setDataPosition(0);
-            remoteDevice = (WifiP2pDevice) remoteDeviceCreator.createFromParcel(parcel);
-            parcel.recycle();
-            this.establishConnection(remoteDevice);
-            // Add the remote device to the activeSessions.
-            fidfajdlfajkdhsafds;
-        } catch (Exception e){
-            Log.d(TAG, "COMMUNICATION handshake ... FAILED.");
-            Log.d(TAG, e.getMessage());
-        } finally {
-            inputStream.close();
-            outputStream.close();
+        }).start();
+        Log.d("ClientListener","end");
+    }
+
+    private void clientSocketInDataHandler(InputStream inputStream) {
+        // While there is data to be received, receive it.
+        byte[] resultHeader = new byte[1];
+        try {
+            Log.d("ClientListener", "Sub start.");
+            while (inputStream.read(resultHeader, 0, resultHeader.length) != -1) {
+                Log.d("ClientListener", "Inner Listening");
+                switch (resultHeader[0]) {
+                    case WifiConnectionManager.SIG_PLAY_CODE:
+                        Log.d("SigReceived!", "Play sig received!");
+                        break;
+                    case WifiConnectionManager.SIG_PAUSE_CODE:
+                        Log.d("SigReceived!", "Pause sig received");
+                        break;
+                    case WifiConnectionManager.SIG_STOP_CODE:
+                        Log.d("SigReceived!", "Stop sig received");
+                        break;
+                    default:
+                        Log.d("SigReceived!", "Oh snape, an unknown signal!");
+                }
+            }
+            Log.d("ClientListener", "Sub end.");
+        } catch (IOException e) {
+            Log.d("ClientListenException", "COMMUNICATION receiving signal ... FAILED.");
         }
     }
-    private void receivedPlaySig() {}
-    private void receivedStopSig() {}
-    private void receivedPauseSig() {}
 
-    private void establishConnection(WifiP2pDevice remoteDevice) {
-        WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = remoteDevice.deviceAddress;
-        WifiP2pManager.ActionListener connectActionListener = new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "CONNECTION connecting to other device ... SUCCESS.");
+    @Override
+    public void sendSig(byte signal) {
+        Log.d("SendSig", "Start");
+        // Get this set of sockets, iterating over each to send a signal.
+        // Uses sendSigAsyncHelper.
+        synchronized (this.openSockets) {
+            Iterator<Socket> i = this.openSockets.iterator();
+            Log.d("SendSig", "Has elements?: "+Boolean.toString(i.hasNext()));
+            while(i.hasNext()) {
+                sendSigAsyncHelper(i.next(), signal);
             }
-
-            @Override
-            public void onFailure(int reason) {
-                Log.d(TAG, "CONNECTION connecting to other device ... FAILURE");
-            }
-        };
-        this.manager.connect(this.channel, config, connectActionListener);
+        }
+        Log.d("SendSig", "end");
     }
 
-    private void sendHandshake() {
-        WifiP2pDevice
+    private void sendSigAsyncHelper (final Socket remoteSocket, final byte signal) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("AsyncHelper", "Start");
+                Socket socket = remoteSocket;
+                try {
+                    OutputStream outputStream = socket.getOutputStream();
+                    Log.d("AsyncHelper", "got ostream");
+                    outputStream.write(signal);
+                    Log.d("AsyncHelper", "Wrote to stream");
+                } catch (IOException e) {
+                    Log.d(TAG, "DATA XFER getting / using output stream ... ERROR");
+                    Log.d(TAG, e.getMessage());
+                }
+                Log.d("AsyncHelper", "End");
+            }
+        }).start();
     }
-
-    private void sendPlaySig() {}
-    private void sendStopSig() {}
-    private void sendPauseSig() {}
 
     // --- Methods for common connectivity of ConnectionManager. --- //
 
 
     @Override
     public void initiateSession(String sessionName) {
-        this.registerForNSD(WifiConnectionManager.NSD_SERVICE_INSTANCE_VALUE, WifiConnectionManager.NSD_SERVICE_PROTOCOL_VALUE, sessionName);
+        // Start a WifiP2pGroup. This should let us init the server socket.
+        this.createSessionGroup();
+        // Init the ServerSocket.
+        this.serverSocketAcceptThreadInit();
+        // Register our service for discovery.
+        Log.d("LocalPort", Integer.toString(this.serverPort));
+        this.registerForNSD(WifiConnectionManager.NSD_SERVICE_INSTANCE_VALUE, WifiConnectionManager.NSD_SERVICE_PROTOCOL_VALUE, sessionName, this.serverPort);
     }
     @Override
     public void joinSession(String sessionName) {
@@ -246,7 +270,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
     }
 
 
-    // --- Methods for Network Service Discovery (NSD). --- //
+    // --- Methods for Network Service Discovery (NSD) + establishing p2p connections. --- //
 
 
     /*
@@ -265,7 +289,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
      */
 
 
-    private void registerForNSD(String serviceName, String serviceProtocol, String sessionName) {
+    private void registerForNSD(String serviceName, String serviceProtocol, String sessionName, int sessionPort) {
         /*
             Set up a record with information about our service. We should include a session name,
             the app name (or other ID unique to the app), and the connection information.
@@ -275,23 +299,25 @@ public class WifiConnectionManager extends BaseConnectionManager {
         Map record = new HashMap();
         record.put(this.NSD_RECORD_APP_ID, serviceName);
         record.put(this.NSD_RECORD_SESSION_ID, sessionName);
-        record.put(this.NSD_RECORD_PORT_ID, this.serverSocket.getLocalPort());
+        record.put(this.NSD_RECORD_PORT_ID, Integer.toString(sessionPort));
         serviceInfo = WifiP2pDnsSdServiceInfo.newInstance(serviceName, serviceProtocol, record);
         WifiP2pManager.ActionListener actionListener = new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "NSD local service added ... SUCCESS. (Server)");
+                Toast.makeText(WifiConnectionManager.this.context, "Service Added!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(int reason) {
                 Log.d(TAG, "NSD local service added ... FAILURE. (Server)\nReason code: " + reason);
+                Toast.makeText(WifiConnectionManager.this.context, "Service not added!", Toast.LENGTH_SHORT).show();
             }
         };
         this.manager.addLocalService(channel, serviceInfo, actionListener);
     }
 
-    private void discoverForNSD(String sessionName) {
+    private void discoverForNSD(final String sessionName) {
         /*
             Set up listeners for NSD service responses, and for an incoming NSD textRecord.
 
@@ -314,16 +340,19 @@ public class WifiConnectionManager extends BaseConnectionManager {
                 // Check if this is our app ...
                 if (txtRecordMap.get(WifiConnectionManager.NSD_RECORD_APP_ID).equals(WifiConnectionManager.NSD_SERVICE_INSTANCE_VALUE)) {
                     /*
-                        The other device is running an instance of our app; Get this session
-                        information (name) for this broadcast and update activeSessions with the
-                        device that is a part of this session. If the session has not yet been
-                        discovered, make sure to create an entry for it.
+                        It's our app, so if the session name is the one we want to join, then form
+                        a connection.
                     */
-                    String sessionName = txtRecordMap.get(WifiConnectionManager.NSD_RECORD_SESSION_ID);
-                    if (!WifiConnectionManager.this.activeSessions.containsKey(sessionName)) {
-                        WifiConnectionManager.this.activeSessions.put(sessionName, new HashSet<WifiP2pDevice>());
+                    if (txtRecordMap.get(WifiConnectionManager.NSD_RECORD_SESSION_ID).equals(sessionName)) {
+                        WifiConnectionManager.this.serverPort = Integer.parseInt(txtRecordMap.get(WifiConnectionManager.NSD_RECORD_PORT_ID));
+                        Log.d("ServerPortVal", Integer.toString(WifiConnectionManager.this.serverPort));
+                        WifiConnectionManager.this.establishConnection(srcDevice);
+                        /*
+                            Check the broadcast receiver for changed connections. If the connection
+                            has changed then we can get the group owner info and form a socket
+                            connection.
+                        */
                     }
-                    WifiConnectionManager.this.activeSessions.get(sessionName).add(srcDevice);
                 }
             }
         };
@@ -370,6 +399,39 @@ public class WifiConnectionManager extends BaseConnectionManager {
         this.manager.discoverServices(this.channel, discoverServiceActionListener);
     }
 
+    private void establishConnection(WifiP2pDevice remoteDevice) {
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = remoteDevice.deviceAddress;
+        WifiP2pManager.ActionListener connectActionListener = new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "CONNECTION connecting to other device ... SUCCESS.");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.d(TAG, "CONNECTION connecting to other device ... FAILURE");
+            }
+        };
+        this.manager.connect(this.channel, config, connectActionListener);
+    }
+
+    private void createSessionGroup() {
+        WifiP2pManager.ActionListener createGroupActionListener = new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG,"GROUP create group ... SUCCESS.");
+                Toast.makeText(WifiConnectionManager.this.context, "Group created!", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onFailure(int reason) {
+                Log.d(TAG,"GROUP create group ... FAILURE.");
+                Toast.makeText(WifiConnectionManager.this.context, "Group not created!", Toast.LENGTH_SHORT).show();
+            }
+        };
+        this.manager.createGroup(this.channel, createGroupActionListener);
+    }
+
     private void cleanUpForNSD() {
         // Make sure that if we added a local service, then clean it up.
         if (this.serviceInfo != null) {
@@ -401,6 +463,32 @@ public class WifiConnectionManager extends BaseConnectionManager {
             };
             this.manager.removeServiceRequest(this.channel, this.serviceRequest, removeRequestActionListener);
         }
+        this.manager.cancelConnect(this.channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Cancelled Connections.");
+                Toast.makeText(WifiConnectionManager.this.context, "Cancelled Connect", Toast.LENGTH_SHORT);
+            }
+            @Override
+            public void onFailure(int reason) {
+                Log.d(TAG, "Failed Cancel Connections.");
+                Toast.makeText(WifiConnectionManager.this.context, "Failed Cancel Connect", Toast.LENGTH_SHORT);
+            }
+        });
+        WifiConnectionManager.this.manager.removeGroup(WifiConnectionManager.this.channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Removed group.");
+                Toast.makeText(WifiConnectionManager.this.context, "Removed Group", Toast.LENGTH_SHORT);
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.d(TAG, "Couldn't Removed group.");
+                Toast.makeText(WifiConnectionManager.this.context, "Couldn't Removed Group", Toast.LENGTH_SHORT);
+            }
+
+        });
     }
 
 
@@ -459,6 +547,27 @@ public class WifiConnectionManager extends BaseConnectionManager {
                 /*
                     Cleanup resources associated with lost connection.
                  */
+                // The following code uses heavily from:
+                // https://developer.android.com/training/connect-devices-wirelessly/wifi-direct.html
+                Log.d("BCRinner", "Start");
+                NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                if (networkInfo.isConnected()) {
+                    WifiP2pManager.ConnectionInfoListener connectionInfoListener = new WifiP2pManager.ConnectionInfoListener() {
+                        @Override
+                        public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+                            InetAddress groupOwnerAddress = info.groupOwnerAddress;
+
+                            // If this device is the group owner, probably want to init a ServerSocket.
+                            // Else this device is probably a client, and we should connect to the host.
+                            if (info.groupFormed && !info.isGroupOwner) {
+                                Log.d("ClientListener", "Port: "+Integer.toString(WifiConnectionManager.this.serverPort));
+                                WifiConnectionManager.this.clientSocketInDataListenThreadInit(groupOwnerAddress.getHostAddress(), WifiConnectionManager.this.serverPort);
+                            }
+                        }
+                    };
+                    WifiConnectionManager.this.manager.requestConnectionInfo(WifiConnectionManager.this.channel, connectionInfoListener);
+                    Log.d("BCRinner", "end");
+                }
             } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                 // Respond to this device's wifi state changing
                 /*
