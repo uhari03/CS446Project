@@ -34,6 +34,16 @@
             android:layout_marginTop="10dp"
             android:text="@string/leave_session" />
 
+        <TextView
+            android:id="@+id/textViewWaitForSongs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/buttonLeaveSession"
+            android:layout_toRightOf="@id/buttonLeaveSession"
+            android:text="@string/waiting_for_songs"
+            android:textSize="15sp"
+            android:textColor="#000000" />
+
     </RelativeLayout>
 
     <ListView

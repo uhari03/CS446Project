@@ -25,7 +25,8 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="51dp"
-        android:text="@string/join_session" />
+        android:text="@string/join_session"
+        android:onClick="onJoinSession"/>
 
     <Button
         android:id="@+id/buttonManagePlaylist"

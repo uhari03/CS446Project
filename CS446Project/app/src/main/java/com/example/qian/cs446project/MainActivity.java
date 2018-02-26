@@ -1,8 +1,8 @@
 package com.example.qian.cs446project;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
@@ -30,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(managePlaylistIntent);
             }
         });
+    }
+
+    public void onJoinSession(View v) {
+        // Create a ChooseSessionActivity (screen 2 in mockup).
+        Intent joinSessionIntent = new Intent(this, ChooseSessionActivity.class);
+        startActivity(joinSessionIntent);
     }
 
 }

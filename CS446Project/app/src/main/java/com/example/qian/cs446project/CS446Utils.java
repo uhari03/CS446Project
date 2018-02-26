@@ -1,5 +1,9 @@
 package com.example.qian.cs446project;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
 /**
  * Created by Qian on 2018-02-21.
  */
@@ -17,6 +21,11 @@ public class CS446Utils {
         }
         formattedTime += seconds;
         return formattedTime;
+    }
+
+    public static void broadcastIntentWithoutExtras(String intentName, Context broadcastSender) {
+        Intent intentToBroadcast = new Intent(intentName);
+        LocalBroadcastManager.getInstance(broadcastSender).sendBroadcast(intentToBroadcast);
     }
 
 }
