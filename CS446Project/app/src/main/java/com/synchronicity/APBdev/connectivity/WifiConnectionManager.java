@@ -16,8 +16,11 @@ import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.qian.cs446project.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,6 +50,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
     private WifiP2pServiceRequest serviceRequest;
     private HashMap<String, HashSet<WifiP2pDevice>> activeSessions;
     private HashSet<Socket> openSockets;
+    private LocalBroadcastManager localBroadcastManager;
     private int serverPort;
     // Constants for NSD. These should go in an enum later?
     private static final String NSD_SERVICE_INSTANCE_VALUE = "SynchronicityCS446";
@@ -77,6 +81,7 @@ public class WifiConnectionManager extends BaseConnectionManager {
         this.activeSessions = new HashMap<String, HashSet<WifiP2pDevice>>();
         this.openSockets = new HashSet<Socket>();
         this.serverPort = 0;
+        this.localBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
 
@@ -195,12 +200,18 @@ public class WifiConnectionManager extends BaseConnectionManager {
                 switch (resultHeader[0]) {
                     case WifiConnectionManager.SIG_PLAY_CODE:
                         Log.d("SigReceived!", "Play sig received!");
+                        Intent intent1 = new Intent(this.context.getString(R.string.receive_play));
+                        localBroadcastManager.sendBroadcast(intent1);
                         break;
                     case WifiConnectionManager.SIG_PAUSE_CODE:
                         Log.d("SigReceived!", "Pause sig received");
+                        Intent intent2 = new Intent(this.context.getString(R.string.receive_pause));
+                        localBroadcastManager.sendBroadcast(intent2);
                         break;
                     case WifiConnectionManager.SIG_STOP_CODE:
                         Log.d("SigReceived!", "Stop sig received");
+                        Intent intent3 = new Intent(this.context.getString(R.string.receive_stop));
+                        localBroadcastManager.sendBroadcast(intent3);
                         break;
                     default:
                         Log.d("SigReceived!", "Oh snape, an unknown signal!");
