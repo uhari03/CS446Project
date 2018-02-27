@@ -37,8 +37,10 @@ public class ChooseSessionActivity extends AppCompatActivity {
         final ListView sessionList = findViewById(R.id.listViewSessionsList);
         waitMessage = findViewById(R.id.textViewWaitForSessionNames);
         applicationContext = getApplicationContext();
+        sessionNames.add("Demo");
         sessionListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sessionNames);
         sessionList.setAdapter(sessionListAdapter);
+        waitMessage.setVisibility(View.INVISIBLE);
         Button buttonJoin = findViewById(R.id.buttonJoin);
         buttonJoin.setOnClickListener(new View.OnClickListener() {
             @Override

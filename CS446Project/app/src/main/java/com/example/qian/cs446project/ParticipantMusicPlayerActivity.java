@@ -8,7 +8,6 @@ import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,9 +17,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
+import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import static android.widget.Toast.makeText;
 import static com.example.qian.cs446project.CS446Utils.formatTime;
 
 /**
@@ -46,11 +51,13 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     private TextView waitMessage;
     private IntentFilter participantIntentFilter;
     private BroadcastReceiver participantMusicPlayerReceiver;
+    // Andrew's stuff
+    private BaseConnectionManager baseConnectionManager;
+    private BroadcastReceiver wifiBroadcastReceiver;
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
-                Uri.parse(Environment.getExternalStorageDirectory().getPath() +
-                        playlist.songs.get(currentSong).getFilePath()));
+                Uri.parse(playlist.songs.get(currentSong).getFilePath()));
         mediaPlayer.setOnCompletionListener(this);
     }
 
@@ -63,6 +70,54 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
         waitMessage = findViewById(R.id.textViewWaitForSongs);
         applicationContext = getApplicationContext();
+        ArrayList<Playlist> allPlaylists = PlaylistManager.listAllAppPlaylists(applicationContext);
+        baseConnectionManager = new WifiConnectionManager(this, this);
+        wifiBroadcastReceiver = baseConnectionManager.getBroadcastReceiver();
+        if (allPlaylists == null || allPlaylists.size() == 0) {
+            Toast errorToast = Toast.makeText(applicationContext, "Participant failed to retrieve session playlist.",
+                    Toast.LENGTH_SHORT);
+            errorToast.setMargin(50, 50);
+            errorToast.show();
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(participantMusicPlayerReceiver);
+            participantIntentFilter = null;
+            participantMusicPlayerReceiver = null;
+            stopped = true;
+            if (mediaPlayer != null) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+            baseConnectionManager.cleanUp();
+            System.exit(1);
+        } else {
+            playlist = allPlaylists.get(1);
+            customMusicAdapter =
+                    new CustomMusicAdapter(ParticipantMusicPlayerActivity.this,
+                            R.layout.song_in_gui, playlist);
+            listView.setAdapter(customMusicAdapter);
+            waitMessage.setVisibility(View.INVISIBLE);
+            PlaylistManager.listAllPlaylistSongs(applicationContext, playlist);
+
+            if (playlist.songs == null || playlist.songs.size() == 0) {
+                Toast errorToast = Toast.makeText(applicationContext, "Participant failed to retrieve session playlist songs.",
+                        Toast.LENGTH_SHORT);
+                errorToast.setMargin(50, 50);
+                errorToast.show();
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(participantMusicPlayerReceiver);
+                participantIntentFilter = null;
+                participantMusicPlayerReceiver = null;
+                stopped = true;
+                if (mediaPlayer != null) {
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+                baseConnectionManager.cleanUp();
+                System.exit(1);
+            }
+        }
+        // Andrew's code
+        registerReceiver(wifiBroadcastReceiver, baseConnectionManager.getIntentFilter());
+        baseConnectionManager.joinSession("Demo");
+        createMediaPlayer();
     }
 
     @Override
@@ -152,8 +207,7 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     private void setMediaPlayerToCurrentSong() {
         mediaPlayer.reset();
         try {
-            mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath() +
-                    playlist.songs.get(currentSong).getFilePath());
+            mediaPlayer.setDataSource(playlist.songs.get(currentSong).getFilePath());
             mediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
@@ -299,6 +353,7 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        baseConnectionManager.cleanUp();
     }
 
 }
