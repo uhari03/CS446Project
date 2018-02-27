@@ -1,3 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+    <!--The domain name, followed by a dot, must be appended at the beginning of the action name for
+    any custom Intent that the app broadcasts.-->
+    <!ENTITY domain_name "com.example.qian.cs446project.">
+]>
+
 <resources>
     <string name="app_name">CS 446 Project</string>
+    <string name="title">Title: </string>
+    <string name="artist">Artist: </string>
+    <string name="album">Album: </string>
+    <string name="time_placeholder">0:00</string>
+    <string name="create_session">Create Session</string>
+    <string name="join_session">Join Session</string>
+    <string name="manage_playlist">Manage Playlist</string>
+    <string name="end_session">End Session</string>
+    <string name="leave_session">Leave Session</string>
+    <string name="exit">Exit</string>
+    <string name="join">Join</string>
+    <!--Host's session playlist GUI (screen 6 of mockup) shows this string after all participants
+    have finished downloading the song in the session playlist.-->
+    <string name="ready_to_play">Ready to play</string>
+    <!--Host's session playlist GUI (screen 6 of mockup) shows this string when a participant joins
+    a session.-->
+    <string name="wait_message">Please wait for new participants to download files.</string>
+    <!--Name of any parcelable extra that is a Playlist object-->
+    <string name="session_playlist">playlist</string>
+    <!--String for the broadcasted Intent HostMusicPlayerActivity receives to indicate that a new
+    participant has joined the session-->
+    <string name="participant_joined">&domain_name;new_participant_joined</string>
+    <!--String for the broadcasted Intent HostMusicPlayerActivity receives to indicate that all
+    participants have finished downloading at least the 1st song in the session playlist-->
+    <string name="all_participants_ready">&domain_name;all_participants_ready</string>
+    <!--String for the Intent HostMusicPlayerActivity broadcasts to tell other components that the
+    session playlist is currently stopped (i.e. the session playlist is not playing nor paused)-->
+    <string name="playlist_stopped">&domain_name;playlist_stopped</string>
+    <!--String for the Intent HostMusicPlayerActivity broadcasts to tell other components that the
+    session playlist is currently not stopped (i.e. the session playlist is playing or paused)-->
+    <string name="playlist_not_stopped">&domain_name;playlist_not_stopped</string>
+    <!--String for the Intent HostMusicPlayerActivity broadcasts to tell other components that the
+    host has pressed Play on the session playlist-->
+    <string name="send_play">&domain_name;send_play</string>
+    <!--String for the Intent HostMusicPlayerActivity broadcasts to tell other components that the
+    host has paused the session playlist-->
+    <string name="send_pause">&domain_name;send_pause</string>
+    <!--String for the Intent HostMusicPlayerActivity broadcasts to tell other components that the
+    host has stopped the session playlist-->
+    <string name="send_stop">&domain_name;send_stop</string>
+    <!--String for the broadcasted Intent ParticipantMusicPlayerActivity receives to indicate that
+    it should play the session playlist-->
+    <string name="receive_play">&domain_name;receive_play</string>
+    <!--String for the broadcasted Intent ParticipantMusicPlayerActivity receives to indicate that
+    it should pause the session playlist-->
+    <string name="receive_pause">&domain_name;receive_pause</string>
+    <!--String for the broadcasted Intent ParticipantMusicPlayerActivity receives to indicate that
+    it should stop the session playlist-->
+    <string name="receive_stop">&domain_name;receive_stop</string>
+    <!--String for the broadcasted Intent ParticipantMusicPlayerActivity receives to indicate that
+    the 1st song in the session playlist has finished downloading onto the participant's device-->
+    <string name="song_finished_downloading">&domain_name;song_finished_downloading</string>
+    <!--Name of the Intent ParticipantMusicPlayerActivity broadcasts to tell other components
+    the user has joined a session and is requesting the session playlist.-->
+    <string name="user_chose_session">&domain_name;user_chose_session</string>
+    <!--Name of the extra that the user_chose_session Intent contains. This extra is the name of the
+    session that the user has chosen to join.-->
+    <string name="name_of_chosen_session">name_of_chosen_session</string>
+    <!--Name of the parcelable extra that is the list of sessions used when creating an instance of
+    ChooseSessionActivity-->
+    <string name="session_list">session_list</string>
+    <!--Participant's session playlist GUI (screen 3 of mockup) shows this string before the app
+    loads the metadata of the songs in the playlist.-->
+    <string name="waiting_for_songs">Loading songs...</string>
+    <!--Name of the broadcasted Intent ParticipantMusicPlayerActivity receives that contains the
+    Playlist object with the metadata for all songs in the session playlist-->
+    <string name="playlist_ready">&domain_name;playlist_ready</string>
+    <!--Name of the extra that the playlist_ready Intent contains that is the Playlist object
+    representing the session playlist.-->
+    <string name="session_playlist_metadata">session_playlist_metadata</string>
+    <!--Name of the broadcasted Intent ChooseSessionActivity receives that contains the ArrayList
+    of Strings, which lists the name of every session that the user can join.-->
+    <string name="session_list_ready">&domain_name;session_list_ready</string>
+    <!--Name of the extra that the session_list_ready Intent contains that is the ArrayList of
+    Strings, listing the name of every session that the user can join.-->
+    <string name="session_names_list">session_names_list</string>
+    <!--The GUI that lists all sessions a user can join (screen 2 of mockup) shows this string
+    before ChooseSessionActivity receives the list of session names.-->
+    <string name="waiting_for_session_names">Retrieving sessions...</string>
+    <!--Name of the Intent HostMusicPlayerActivity broadcasts to tell other components that a user
+    has finished creating a session-->
+    <string name="session_created">&domain_name;session_created</string>
+    <!--Name of the Intent ChooseSessionActivity broadcasts to tell other components that a user is
+    looking for a session to join-->
+    <string name="user_looking_to_join_session">&domain_name;user_looking_to_join_session</string>
+    <!--Name of the extra in the targeted Intent that ChooseSessionActivity sends to
+    ParticipantMusicPlayerActivity. This extra is a String that is the name of the session the
+    user has chosen to join.-->
+    <string name="session_name">session_name</string>
+    <!--Name of the broadcasted Intent HostMusicPlayerActivity receives that indicates the
+    connection manager is requesting the session playlist.-->
+    <string name="request_session_playlist">&domain_name;request_session_playlist</string>
+    <!--Name of the Intent HostMusicPlayerActivity broadcasts that contains the session playlist-->
+    <string name="return_session_playlist">&domain_name;return_session_playlist</string>
+    <!--Name of the Intent ChooseSessionActivity broadcasts to tell other components that it is
+    requesting a list of available sessions the user can join-->
+    <string name="find_sessions">&domain_name;find_sessions</string>
+    <string name="start_session">Start Session</string>
+    <string name="enter_session_name">Enter Session Name</string>
+    <string name="select_playlist_to_upload_to_session">Select Playlist to Upload to Session:</string>
+    <string name="select_songs_to_upload_to_playlist">Select Songs to Upload to Playlist:</string>
+    <string name="new_playlist">New Playlist</string>
+    <string name="create_playlist">Create Playlist</string>
+    <string name="enter_playlist_name">Enter Playlist Name</string>
+    <!--Name of an extra in the targeted Intent that CreateSessionActivity sends to
+    ParticipantMusicPlayerActivity. This extra is a String that is the name of the session the
+    user created.-->
+    <string name="created_session_name">created_session_name</string>
 </resources>
