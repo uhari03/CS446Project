@@ -18,6 +18,9 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
+import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
+
 import java.io.IOException;
 
 import static com.example.qian.cs446project.CS446Utils.broadcastIntentWithoutExtras;
@@ -47,6 +50,10 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     private Context applicationContext;
     private IntentFilter waitForDownload;
     private BroadcastReceiver hostMusicPlayerReceiver;
+    // Andrew's stuff
+    private BaseConnectionManager baseConnectionManager;
+    private BroadcastReceiver wifiBroadcastReceiver;
+
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
@@ -75,6 +82,11 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // Broadcast an Intent to tell the app that the user has created a session.
         broadcastIntentWithoutExtras(applicationContext.getString(R.string.session_created),
                 this);
+        // Andrew's code
+        baseConnectionManager = new WifiConnectionManager(this, this);
+        wifiBroadcastReceiver = baseConnectionManager.getBroadcastReceiver();
+        registerReceiver(wifiBroadcastReceiver, baseConnectionManager.getIntentFilter());
+        baseConnectionManager.initiateSession("Demo");
     }
 
     @Override
@@ -91,6 +103,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         // When the 1st participant joins the session, the connection manager requests the session
         // playlist from the host.
         waitForDownload.addAction(applicationContext.getString(R.string.request_session_playlist));
+        waitForDownload.addAction((applicationContext.getString(R.string.user_chose_session)));
         hostMusicPlayerReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -110,6 +123,8 @@ public class HostMusicPlayerActivity extends AppCompatActivity
                             .getString(R.string.return_session_playlist));
                     returnPlaylistIntent.putExtra(applicationContext
                             .getString(R.string.session_playlist), playlist);
+                    LocalBroadcastManager.getInstance(HostMusicPlayerActivity.this)
+                            .sendBroadcast(returnPlaylistIntent);
                 }
             }
         };
@@ -184,14 +199,16 @@ public class HostMusicPlayerActivity extends AppCompatActivity
         }
         if (mediaPlayer.isPlaying()) {
             // Broadcast an intent for all participants to pause the playlist.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_pause),
-                    this);
+//            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_pause),
+//                    this);
+            baseConnectionManager.sendSig(WifiConnectionManager.SIG_PAUSE_CODE);
             mediaPlayer.pause();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
         } else {
             // Broadcast an intent for all participants to play the playlist.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_play),
-                    this);
+//            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_play),
+//                    this);
+            baseConnectionManager.sendSig(WifiConnectionManager.SIG_PLAY_CODE);
             mediaPlayer.start();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
         }
@@ -269,8 +286,9 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     public void onStop(View v) {
         if (!stopped) {
             // Broadcast an Intent for all participants to stop the playlist.
-            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_stop),
-                    this);
+//            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_stop),
+//                    this);
+            baseConnectionManager.sendSig(WifiConnectionManager.SIG_STOP_CODE);
             mediaPlayer.stop();
             resetPlaylist();
         }
@@ -323,6 +341,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        baseConnectionManager.cleanUp();
     }
 
 }

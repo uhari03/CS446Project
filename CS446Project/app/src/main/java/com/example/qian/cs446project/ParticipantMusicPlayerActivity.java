@@ -18,9 +18,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
+import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import static android.widget.Toast.makeText;
 import static com.example.qian.cs446project.CS446Utils.formatTime;
 
 /**
@@ -46,6 +52,9 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
     private TextView waitMessage;
     private IntentFilter participantIntentFilter;
     private BroadcastReceiver participantMusicPlayerReceiver;
+    // Andrew's stuff
+    private BaseConnectionManager baseConnectionManager;
+    private BroadcastReceiver wifiBroadcastReceiver;
 
     private void createMediaPlayer() {
         mediaPlayer = MediaPlayer.create(applicationContext,
@@ -63,6 +72,21 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
         waitMessage = findViewById(R.id.textViewWaitForSongs);
         applicationContext = getApplicationContext();
+        ArrayList<Playlist> allPlaylists = PlaylistManager.listAllAppPlaylists(applicationContext);
+        if (allPlaylists == null || allPlaylists.size() == 0) {
+            Toast errorToast = Toast.makeText(applicationContext, "Participant failed to retrieve session playlist.",
+                    Toast.LENGTH_SHORT);
+            errorToast.setMargin(50, 50);
+            errorToast.show();
+            System.exit(1);
+        } else {
+            playlist = allPlaylists.get(0);
+        }
+        // Andrew's code
+        baseConnectionManager = new WifiConnectionManager(this, this);
+        wifiBroadcastReceiver = baseConnectionManager.getBroadcastReceiver();
+        registerReceiver(wifiBroadcastReceiver, baseConnectionManager.getIntentFilter());
+        //baseConnectionManager.initiateSession("Demo");
     }
 
     @Override
@@ -299,6 +323,7 @@ public class ParticipantMusicPlayerActivity extends AppCompatActivity
             mediaPlayer.release();
             mediaPlayer = null;
         }
+        baseConnectionManager.cleanUp();
     }
 
 }
