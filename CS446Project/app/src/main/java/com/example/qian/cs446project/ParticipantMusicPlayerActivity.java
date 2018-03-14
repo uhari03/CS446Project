@@ -25,7 +25,6 @@ import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static android.widget.Toast.makeText;
 import static com.example.qian.cs446project.CS446Utils.formatTime;
 
 /**
@@ -33,7 +32,7 @@ import static com.example.qian.cs446project.CS446Utils.formatTime;
  */
 
 public class ParticipantMusicPlayerActivity extends AppCompatActivity
-        implements MediaPlayer.OnCompletionListener {
+        implements MediaPlayer.OnCompletionListener, ParticipantMusicPlayer {
 
     private MediaPlayer mediaPlayer;
     private Playlist playlist;

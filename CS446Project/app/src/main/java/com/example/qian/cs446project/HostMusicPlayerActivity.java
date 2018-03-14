@@ -31,7 +31,7 @@ import static com.example.qian.cs446project.CS446Utils.formatTime;
  */
 
 public class HostMusicPlayerActivity extends AppCompatActivity
-        implements MediaPlayer.OnCompletionListener {
+        implements MediaPlayer.OnCompletionListener, HostMusicPlayer {
 
     private MediaPlayer mediaPlayer;
     private Playlist playlist;
@@ -252,7 +252,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     private void resetPlaylist() {
         stopped = true;
         // At least in the prototype, we might want to prevent users from joining a session
-        // while a session playlist is playing or paused. MusicPlayer broadcasts an intent when
+        // while a session playlist is playing or paused. HostMusicPlayer broadcasts an intent when
         // the host starts the session playlist and another when the host stops the session
         // playlist or the playlist finishes. As a result, other components know when they
         // should prevent users from joining a session.
