@@ -252,9 +252,9 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     private void resetPlaylist() {
         stopped = true;
         // At least in the prototype, we might want to prevent users from joining a session
-        // while a session playlist is playing or paused. HostMusicPlayer broadcasts an intent when
-        // the host starts the session playlist and another when the host stops the session
-        // playlist or the playlist finishes. As a result, other components know when they
+        // while a session playlist is playing or paused. HostMusicPlayerActivity broadcasts an
+        // intent when the host starts the session playlist and another when the host stops the
+        // session playlist or the playlist finishes. As a result, other components know when they
         // should prevent users from joining a session.
         broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_stopped),
                 this);
