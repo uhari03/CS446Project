@@ -233,15 +233,31 @@ public class WifiConnectionManager extends BaseConnectionManager {
             Log.d("SendSig", "Has elements?: "+Boolean.toString(i.hasNext()));
             while(i.hasNext()) {
                 sendSigAsyncHelper(i.next(), signal);
+                switch (signal) {
+                    case WifiConnectionManager.SIG_PLAY_CODE:
+                        Intent intent1 = new Intent(this.context.getString(R.string.receive_play));
+                        localBroadcastManager.sendBroadcast(intent1);
+                        break;
+                    case WifiConnectionManager.SIG_PAUSE_CODE:
+                        Intent intent2 = new Intent(this.context.getString(R.string.receive_pause));
+                        localBroadcastManager.sendBroadcast(intent2);
+                        break;
+                    case WifiConnectionManager.SIG_STOP_CODE:
+                        Intent intent3 = new Intent(this.context.getString(R.string.receive_stop));
+                        localBroadcastManager.sendBroadcast(intent3);
+                        break;
+                    default:
+                        Log.d("SigReceived!", "Oh snape, an unknown signal!");
+                }
             }
         }
         Log.d("SendSig", "end");
     }
 
     private void sendSigAsyncHelper (final Socket remoteSocket, final byte signal) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        //new Thread(new Runnable() {
+        //    @Override
+        //    public void run() {
                 Log.d("AsyncHelper", "Start");
                 Socket socket = remoteSocket;
                 try {
@@ -254,8 +270,8 @@ public class WifiConnectionManager extends BaseConnectionManager {
                     Log.d(TAG, e.getMessage());
                 }
                 Log.d("AsyncHelper", "End");
-            }
-        }).start();
+        //    }
+        // }).start();
     }
 
     // --- Methods for common connectivity of ConnectionManager. --- //
