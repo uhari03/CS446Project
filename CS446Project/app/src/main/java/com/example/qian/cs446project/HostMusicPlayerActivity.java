@@ -93,6 +93,9 @@ public class HostMusicPlayerActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         waitForDownload = new IntentFilter();
+        waitForDownload.addAction(applicationContext.getString(R.string.receive_stop));
+        waitForDownload.addAction(applicationContext.getString(R.string.receive_play));
+        waitForDownload.addAction(applicationContext.getString(R.string.receive_pause));
         // When a user joins a session, the Play, Pause, and Stop buttons should be disabled for the
         // host because the new participant needs time to receive and download at least the 1st
         // song in the playlist.
@@ -125,6 +128,12 @@ public class HostMusicPlayerActivity extends AppCompatActivity
                             .getString(R.string.session_playlist), playlist);
                     LocalBroadcastManager.getInstance(HostMusicPlayerActivity.this)
                             .sendBroadcast(returnPlaylistIntent);
+                } else if (action.equals(applicationContext.getString(R.string.receive_stop))) {
+                    mediaPlayer.stop();
+                } else if (action.equals(applicationContext.getString(R.string.receive_play))) {
+                    mediaPlayer.start();
+                } else if (action.equals(applicationContext.getString(R.string.receive_pause))) {
+                    mediaPlayer.pause();
                 }
             }
         };
@@ -202,14 +211,14 @@ public class HostMusicPlayerActivity extends AppCompatActivity
 //            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_pause),
 //                    this);
             baseConnectionManager.sendSig(WifiConnectionManager.SIG_PAUSE_CODE);
-            mediaPlayer.pause();
+            // mediaPlayer.pause();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
         } else {
             // Broadcast an intent for all participants to play the playlist.
 //            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_play),
 //                    this);
             baseConnectionManager.sendSig(WifiConnectionManager.SIG_PLAY_CODE);
-            mediaPlayer.start();
+            // mediaPlayer.start();
             playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
         }
     }
@@ -289,7 +298,7 @@ public class HostMusicPlayerActivity extends AppCompatActivity
 //            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_stop),
 //                    this);
             baseConnectionManager.sendSig(WifiConnectionManager.SIG_STOP_CODE);
-            mediaPlayer.stop();
+            // mediaPlayer.stop();
             resetPlaylist();
         }
     }
