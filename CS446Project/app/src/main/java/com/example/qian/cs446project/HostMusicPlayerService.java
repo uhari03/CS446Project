@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import static com.example.qian.cs446project.CS446Utils.broadcastIntentWithoutExtras;
 
@@ -43,7 +44,6 @@ public class HostMusicPlayerService extends SynchronicityMusicPlayerService {
     @Override
     public IBinder onBind(Intent intent) {
         super.onBind(intent);
-        createMediaPlayer();
         // Broadcast an Intent to tell the app that the user has created a session.
         broadcastIntentWithoutExtras(applicationContext.getString(R.string.session_created),
                 this);
@@ -75,6 +75,7 @@ public class HostMusicPlayerService extends SynchronicityMusicPlayerService {
                     mediaPlayer.stop();
                 } else if (action.equals(applicationContext.getString(R.string.receive_play))) {
                     mediaPlayer.start();
+                    Log.d("please help", "currentSong is " + getCurrentSong());
                 } else if (action.equals(applicationContext.getString(R.string.receive_pause))) {
                     mediaPlayer.pause();
                 }
@@ -88,22 +89,19 @@ public class HostMusicPlayerService extends SynchronicityMusicPlayerService {
     }
 
     @Override
-    public void setStopped(boolean stopped) {
-        super.setStopped(stopped);
-        if (!stopped) {
+    public void setMusicPlayerState(MusicPlayerState musicPlayerState) {
+        if (this.musicPlayerState.isStopped()) {
             // At least in the prototype, we might want to prevent users from joining a session
             // while a session playlist is playing or paused. HostMusicPlayerService broadcasts an
-            // Intent when the host starts the session playlist and another when the host stops the
+            // Intent the host starts the session playlist and another when the host stops the
             // session playlist or the playlist finishes. As a result, other components know when
             // they should prevent users from joining a session.
             broadcastIntentWithoutExtras(
                     applicationContext.getString(R.string.playlist_not_stopped),
                     this);
         }
+        super.setMusicPlayerState(musicPlayerState);
     }
-
-    @Override
-    public void pause() {}
 
     @Override
     public void stop() {

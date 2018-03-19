@@ -14,9 +14,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
-import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
-
 import java.util.ArrayList;
 
 /**
@@ -31,9 +28,6 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
     private IntentFilter participantIntentFilter;
     private BroadcastReceiver participantMusicPlayerReceiver;
     private boolean bound = false;
-    // Andrew's stuff
-    private BaseConnectionManager baseConnectionManager;
-    private BroadcastReceiver wifiBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +62,9 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
 
             setPlaylist(playlist);
             waitMessage.setVisibility(View.INVISIBLE);
+            // Andrew's code
+            baseConnectionManager.joinSession("Demo");
         }
-        // Andrew's code
-        baseConnectionManager = new WifiConnectionManager(this, this);
-        wifiBroadcastReceiver = baseConnectionManager.getBroadcastReceiver();
-        registerReceiver(wifiBroadcastReceiver, baseConnectionManager.getIntentFilter());
-        baseConnectionManager.joinSession("Demo");
     }
 
     private ServiceConnection participantMusicPlayerServiceConnection = new ServiceConnection() {
@@ -116,17 +107,18 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                MediaPlayer mediaPlayer = synchronicityMusicPlayerService.getMediaPlayer();
+                MusicPlayerState musicPlayerState =
+                        synchronicityMusicPlayerService.musicPlayerState;
                 if (action.equals(applicationContext.getString(R.string.receive_play))) {
-                    if (!mediaPlayer.isPlaying()) {
+                    if (!musicPlayerState.isPlaying()) {
                         playUpdateGUINotifyService(null);
                     }
                 } else if (action.equals(applicationContext.getString(R.string.receive_pause))) {
-                    if (mediaPlayer.isPlaying()) {
+                    if (!musicPlayerState.isPaused()) {
                         pauseUpdateGUINotifyService(null);
                     }
                 } else if (action.equals(applicationContext.getString(R.string.receive_stop))) {
-                    if (!synchronicityMusicPlayerService.getStopped()) {
+                    if (!musicPlayerState.isStopped()) {
                         stopUpdateGUINotifyService(null);
                     }
                 } else if (action.equals(applicationContext.getString(R.string.playlist_ready))) {
@@ -173,7 +165,6 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
             unbindService(participantMusicPlayerServiceConnection);
             bound = false;
         }
-        baseConnectionManager.cleanUp();
     }
 
 }

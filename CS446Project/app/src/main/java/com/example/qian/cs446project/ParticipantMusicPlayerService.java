@@ -67,6 +67,7 @@ public class ParticipantMusicPlayerService extends SynchronicityMusicPlayerServi
 
     @Override
     public void pause() {
+        super.pause();
         mediaPlayer.pause();
     }
 

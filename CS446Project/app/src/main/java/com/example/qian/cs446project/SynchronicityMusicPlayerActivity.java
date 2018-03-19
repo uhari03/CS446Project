@@ -29,12 +29,17 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
     private SeekBar songProgressBar;
     private int songLength;
     SynchronicityMusicPlayerService synchronicityMusicPlayerService;
+    // Andrew's stuff
+    BaseConnectionManager baseConnectionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host_music_player);
         applicationContext = getApplicationContext();
+        baseConnectionManager = new WifiConnectionManager(this, this);
+        BroadcastReceiver wifiBroadcastReceiver = baseConnectionManager.getBroadcastReceiver();
+        registerReceiver(wifiBroadcastReceiver, baseConnectionManager.getIntentFilter());
     }
 
     @Override
@@ -121,8 +126,8 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
 
     @Override
     public void playUpdateGUINotifyService(View view) {
-        if (synchronicityMusicPlayerService.getStopped()) {
-            synchronicityMusicPlayerService.setStopped(false);
+        if (synchronicityMusicPlayerService.musicPlayerState.isStopped()) {
+            synchronicityMusicPlayerService.setMusicPlayerState(new MusicPlayerPlayingState());
             int currentSong = synchronicityMusicPlayerService.getCurrentSong();
             songLength = playlist.songs.get(currentSong).getDuration();
             boldCurrentSongMetadata(currentSong);
@@ -130,7 +135,7 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (!synchronicityMusicPlayerService.getStopped() &&
+                    while (!synchronicityMusicPlayerService.musicPlayerState.isStopped() &&
                             synchronicityMusicPlayerService.getCurrentSong() < playlist.songs.size()
                             && synchronicityMusicPlayerService.getMediaPlayer() != null) {
                         try {
@@ -193,6 +198,12 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
 
             });
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        baseConnectionManager.cleanUp();
     }
 
 }

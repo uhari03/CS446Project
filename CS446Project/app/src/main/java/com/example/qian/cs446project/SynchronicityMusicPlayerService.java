@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -18,21 +19,13 @@ import java.io.IOException;
 public abstract class SynchronicityMusicPlayerService extends Service implements MusicPlayerService
 {
 
-    boolean stopped = true;
+    MusicPlayerState musicPlayerState = new MusicPlayerStoppedState();
     private boolean muted = false;
     private boolean movingToNextSong = false;
     private int currentSong = 0;
     MediaPlayer mediaPlayer;
     Context applicationContext;
     Playlist playlist;
-
-    public boolean getStopped() {
-        return stopped;
-    }
-
-    public void setStopped(boolean stopped) {
-        this.stopped = stopped;
-    }
 
     public boolean getMuted() {
         return muted;
@@ -54,6 +47,10 @@ public abstract class SynchronicityMusicPlayerService extends Service implements
         return mediaPlayer;
     }
 
+    public void setMusicPlayerState(MusicPlayerState musicPlayerState) {
+        this.musicPlayerState = musicPlayerState;
+    }
+
     private void setMediaPlayerToCurrentSong() {
         mediaPlayer.reset();
         try {
@@ -65,7 +62,7 @@ public abstract class SynchronicityMusicPlayerService extends Service implements
     }
 
     void resetPlaylist() {
-        stopped = true;
+        musicPlayerState = new MusicPlayerStoppedState();
         currentSong = 0;
         setMediaPlayerToCurrentSong();
     }
@@ -77,6 +74,7 @@ public abstract class SynchronicityMusicPlayerService extends Service implements
 
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
+                Log.d("please help", "entered onCompletion");
                 movingToNextSong = true;
                 ++currentSong;
                 if (currentSong < playlist.songs.size()) {
@@ -111,21 +109,29 @@ public abstract class SynchronicityMusicPlayerService extends Service implements
 
     @Override
     public IBinder onBind(Intent intent) {
+
         applicationContext = getApplicationContext();
         playlist = intent.getParcelableExtra(applicationContext.getString(R.string
                 .session_playlist));
+        createMediaPlayer();
         return synchronicityMusicPlayerBinder;
     }
 
     @Override
     public void play() {
-        if (stopped) {
-            stopped = false;
+        if (!musicPlayerState.isPlaying()) {
+            musicPlayerState = new MusicPlayerPlayingState();
         }
     }
 
     @Override
+    public void pause() {
+        musicPlayerState = new MusicPlayerPausedState();
+    }
+
+    @Override
     public void stop() {
+        musicPlayerState = new MusicPlayerStoppedState();
         resetPlaylist();
     }
 
@@ -144,7 +150,7 @@ public abstract class SynchronicityMusicPlayerService extends Service implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopped = true;
+        musicPlayerState = new MusicPlayerPlayingState();
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;

@@ -9,11 +9,11 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.synchronicity.APBdev.connectivity.BaseConnectionManager;
 import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
 
 /**
@@ -28,9 +28,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
     private IntentFilter hostMusicPlayerActivityFilter;
     private BroadcastReceiver hostMusicPlayerReceiver;
     private boolean bound = false;
-    // Andrew's stuff
-    private BaseConnectionManager baseConnectionManager;
-    private BroadcastReceiver wifiBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +49,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
         // HostMusicPlayerActivity represents screen 6 in the mockup. A Playlist is passed to
         // HostMusicPlayerActivity to represent the session playlist.
         setPlaylist(playlist);
-        baseConnectionManager = new WifiConnectionManager(this, this);
-        wifiBroadcastReceiver = baseConnectionManager.getBroadcastReceiver();
-        registerReceiver(wifiBroadcastReceiver, baseConnectionManager.getIntentFilter());
         baseConnectionManager.initiateSession("Demo");
     }
 
@@ -129,7 +123,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
     }
 
     private void enablePlay() {
-        playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
         playPauseButtons.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -138,11 +131,12 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
             }
 
         });
+        playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
     }
 
     @Override
     public void playUpdateGUINotifyService(View view) {
-        if (!synchronicityMusicPlayerService.getMediaPlayer().isPlaying()) {
+        if (!synchronicityMusicPlayerService.musicPlayerState.isPlaying()) {
             super.playUpdateGUINotifyService(view);
             baseConnectionManager.sendSig(WifiConnectionManager.SIG_PLAY_CODE);
             playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
@@ -159,7 +153,7 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
 
     @Override
     public void pauseUpdateGUINotifyService(View view) {
-        if (synchronicityMusicPlayerService.getMediaPlayer().isPlaying()) {
+        if (!synchronicityMusicPlayerService.musicPlayerState.isPaused()) {
             super.pauseUpdateGUINotifyService(view);
             // Broadcast an Intent for all participants to pause the playlist.
 //        broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_pause),
@@ -171,7 +165,7 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
 
     @Override
     public void stopUpdateGUINotifyService(View view) {
-        if (!synchronicityMusicPlayerService.getStopped()) {
+        if (!synchronicityMusicPlayerService.musicPlayerState.isStopped()) {
             super.stopUpdateGUINotifyService(view);
             // Broadcast an Intent for all participants to stop the playlist.
 //            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_stop),
@@ -207,7 +201,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
             bound = false;
         }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(hostMusicPlayerReceiver);
-        baseConnectionManager.cleanUp();
     }
 
 }
