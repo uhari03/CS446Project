@@ -75,7 +75,6 @@ public class HostMusicPlayerService extends SynchronicityMusicPlayerService {
                     mediaPlayer.stop();
                 } else if (action.equals(applicationContext.getString(R.string.receive_play))) {
                     mediaPlayer.start();
-                    Log.d("please help", "currentSong is " + getCurrentSong());
                 } else if (action.equals(applicationContext.getString(R.string.receive_pause))) {
                     mediaPlayer.pause();
                 }
