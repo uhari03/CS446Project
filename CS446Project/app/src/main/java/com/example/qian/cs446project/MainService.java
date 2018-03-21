@@ -14,6 +14,7 @@ public class MainService extends Service {
     private IntentFilter mainServiceFilter;
     private BroadcastReceiver mainServiceReceiver;
     private SynchronicityMusicPlayer synchronicityMusicPlayer;
+    private PlaylistManager playlistManager;
 
     public MainService() {
     }
@@ -21,6 +22,7 @@ public class MainService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         final Context applicationContext = getApplicationContext();
+        playlistManager = new PlaylistManager(getApplicationContext());
         mainServiceFilter = new IntentFilter();
         // When HostMusicPlayerActivity starts, create an instance of HostMusicPlayer, which acts as
         // the model in the MVC design pattern such that HostMusicPlayerActivity is the view.
