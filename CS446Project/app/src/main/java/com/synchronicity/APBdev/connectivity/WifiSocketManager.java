@@ -25,6 +25,7 @@ public class WifiSocketManager implements SocketManager {
     private Context context;
     private ServerSocket serverSocket;
     private Set<Socket> activeConnectionsSet;
+    private DistributionStrategy distributionStrategy;
     private BroadcastReceiver broadcastReceiver;
     private IntentFilter intentFilter;
 
@@ -47,6 +48,7 @@ public class WifiSocketManager implements SocketManager {
         this.context = context;
         this.serverSocket = new ServerSocket(0);
         this.activeConnectionsSet = new HashSet<Socket>();
+        this.distributionStrategy = new GreedyStrategy(this.activeConnectionsSet);
 
         // BroadcastReceive creation and registration.
         this.broadcastReceiver = new BroadcastReceiver() {
@@ -128,6 +130,27 @@ public class WifiSocketManager implements SocketManager {
     @Override
     public void cleanUp() {
         this.context.unregisterReceiver(this.broadcastReceiver);
+    }
+
+    /*
+    INNER CLASSES
+     */
+
+    private interface DistributionStrategy {
+        void distribute(byte[] bytes);
+    }
+
+    private class GreedyStrategy implements DistributionStrategy {
+
+        private Set<Socket> socketSet;
+
+        GreedyStrategy(Set<Socket> socketSet) {
+            this.socketSet = socketSet;
+        }
+
+        public void distribute(byte[] bytes) {
+            // Implement greedy distribution here.
+        }
     }
 
 }
