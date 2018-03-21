@@ -24,7 +24,6 @@
         android:required="true" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -49,16 +48,6 @@
         <activity android:name=".CreateSessionActivity" />
         <activity android:name=".ManagePlaylistActivity" />
         <activity android:name=".CreatePlaylistActivity" />
-
-        <service
-            android:name=".HostMusicPlayer"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".ParticipantMusicPlayer"
-            android:enabled="true"
-            android:exported="true" />
-
         <activity android:name=".SynchronicityMusicPlayerActivity" />
 
         <service
