@@ -7,7 +7,7 @@ import android.view.View;
  * Created by Qian on 2018-03-14.
  */
 
-public interface MusicPlayerService {
+public interface MusicPlayer {
 
     // Play the session playlist.
     void play();

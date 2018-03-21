@@ -1,14 +1,10 @@
 package com.example.qian.cs446project;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.TextView;
@@ -27,7 +23,6 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
     private TextView waitMessage;
     private IntentFilter participantIntentFilter;
     private BroadcastReceiver participantMusicPlayerReceiver;
-    private boolean bound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,31 +62,9 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
         }
     }
 
-    private ServiceConnection participantMusicPlayerServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            ParticipantMusicPlayerService.ParticipantMusicPlayerBinder participantMusicPlayerBinder
-                    = (ParticipantMusicPlayerService.ParticipantMusicPlayerBinder) iBinder;
-            synchronicityMusicPlayerService = participantMusicPlayerBinder.getBinder();
-            bound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-
-    };
-
     @Override
     protected void onStart() {
         super.onStart();
-        Intent serviceIntent = new Intent(this, ParticipantMusicPlayerService.class);
-        serviceIntent.putExtra(applicationContext.getString(R.string.session_playlist),
-                playlist);
-        bindService(serviceIntent, participantMusicPlayerServiceConnection,
-                Context.BIND_AUTO_CREATE);
         participantIntentFilter = new IntentFilter();
         // When the host presses Play for the session playlist, the session playlist should play on
         // the participant's device.
@@ -107,25 +80,25 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                MusicPlayerState musicPlayerState =
-                        synchronicityMusicPlayerService.musicPlayerState;
                 if (action.equals(applicationContext.getString(R.string.receive_play))) {
-                    if (!musicPlayerState.isPlaying()) {
-                        playUpdateGUINotifyService(null);
-                    }
+                    playUpdateGUINotifyService(null);
                 } else if (action.equals(applicationContext.getString(R.string.receive_pause))) {
-                    if (!musicPlayerState.isPaused()) {
-                        pauseUpdateGUINotifyService(null);
-                    }
+                    pauseUpdateGUINotifyService(null);
                 } else if (action.equals(applicationContext.getString(R.string.receive_stop))) {
-                    if (!musicPlayerState.isStopped()) {
-                        stopUpdateGUINotifyService(null);
-                    }
+                    stopUpdateGUINotifyService(null);
                 } else if (action.equals(applicationContext.getString(R.string.playlist_ready))) {
                     playlist = intent.getParcelableExtra(applicationContext
                             .getString(R.string.session_playlist));
                     setPlaylist(playlist);
                     waitMessage.setVisibility(View.INVISIBLE);
+                    // Broadcast an Intent to indicate that ParticipantMusicPlayerActivity has
+                    // started and has the playlist.
+                    Intent startedIntent = new Intent(applicationContext.getString(R.string
+                            .participant_music_player_activity_started));
+                    startedIntent.putExtra(applicationContext.getString(R.string.session_playlist),
+                            playlist);
+                    LocalBroadcastManager.getInstance(ParticipantMusicPlayerActivity.this)
+                            .sendBroadcast(startedIntent);
                 }
             }
 
@@ -146,14 +119,8 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
     }
 
     @Override
-    public void muteUpdateGUINotifyService(View view) {
-        super.muteUpdateGUINotifyService(view);
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(participantMusicPlayerReceiver);
         participantIntentFilter = null;
         participantMusicPlayerReceiver = null;
     }
@@ -161,10 +128,7 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (bound) {
-            unbindService(participantMusicPlayerServiceConnection);
-            bound = false;
-        }
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(participantMusicPlayerReceiver);
     }
 
 }

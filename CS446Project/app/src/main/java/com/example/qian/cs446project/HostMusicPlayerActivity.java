@@ -1,15 +1,11 @@
 package com.example.qian.cs446project;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,47 +48,31 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
         baseConnectionManager.initiateSession("Demo");
     }
 
-    private ServiceConnection hostMusicPlayerServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            HostMusicPlayerService.HostMusicPlayerBinder hostMusicPlayerBinder =
-                    (HostMusicPlayerService.HostMusicPlayerBinder) iBinder;
-            synchronicityMusicPlayerService = hostMusicPlayerBinder.getBinder();
-            bound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-
-    };
-
     @Override
     protected void onStart() {
         super.onStart();
-        Intent serviceIntent = new Intent(this, HostMusicPlayerService.class);
-        serviceIntent.putExtra(applicationContext.getString(R.string.session_playlist),
-                playlist);
-        bindService(serviceIntent, hostMusicPlayerServiceConnection, Context.BIND_AUTO_CREATE);
         hostMusicPlayerActivityFilter = new IntentFilter();
         // When a user joins a session, the Play, Pause, and Stop buttons should be disabled for the
         // host because the new participant needs time to receive and download at least the 1st
         // song in the playlist.
-        hostMusicPlayerActivityFilter.addAction(applicationContext.getString(R.string
+        hostMusicPlayerActivityFilter
+                .addAction(applicationContext.getString(R.string
                 .participant_joined));
         // When all participants have finished downloading at least the 1st song in the playlist,
         // the host's Play, Pause, and Stop buttons should be enabled.
-        hostMusicPlayerActivityFilter.addAction(applicationContext.getString(R.string
+        hostMusicPlayerActivityFilter
+                .addAction(applicationContext.getString(R.string
                 .all_participants_ready));
         hostMusicPlayerActivityFilter.addAction(applicationContext.getString(R.string
                 .user_chose_session));
-        // When a song in the session playlist finishes, HostMusicPlayerActivity updates the GUI to
-        // indicate that the next song is playing, if applicable. Otherwise,
-        // HostMusicPlayerActivity resets the progress bar, elapsed time, and remaining time of each
-        // song in the session playlist.
-        hostMusicPlayerActivityFilter.addAction(applicationContext.getString(R.string.song_completed));
+        // Change the icon for the play/pause button to the pause icon and make it so that if the
+        // host presses that button again, the session playlist pauses.
+        hostMusicPlayerActivityFilter.addAction(applicationContext.getString(R.string
+                .playing_update_GUI));
+        // Change the icon for the play/pause button to the play icon and make it so that if the
+        // host presses that button again, the session playlist resumes playing.
+        hostMusicPlayerActivityFilter.addAction(applicationContext.getString(R.string
+                .paused_update_GUI));
         hostMusicPlayerReceiver = new BroadcastReceiver() {
 
             @Override
@@ -108,11 +88,30 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
                     playPauseButtons.setEnabled(true);
                     stopButton.setEnabled(true);
                     waitMessage.setText(applicationContext.getString(R.string.ready_to_play));
-                } else if (action.equals(applicationContext.getString(R.string.song_completed))) {
-                    songCompleted(intent.getIntExtra(applicationContext.getString(R.string
-                            .current_song_index), 0));
-                    playPauseButtons.setImageResource(android.R.drawable.ic_media_play);
-                    synchronicityMusicPlayerService.setMovingToNextSong(false);
+                } else if (action.equals(applicationContext.getString(R.string.playing_update_GUI)))
+                {
+                    // TODO: Currently, the Music Player on the host's phone notifies the
+                    // Connection Manager that the host has played, paused, or stopped the playlist
+                    // by calling a method in the Connection Manager. We plan to replace these
+                    // method calls with broadcast Intents.
+                    baseConnectionManager.sendSig(WifiConnectionManager.SIG_PLAY_CODE);
+                    playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
+                    playPauseButtons.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View view) {
+                            pauseUpdateGUINotifyService(view);
+                        }
+
+                    });
+                } else if (action.equals(applicationContext.getString(R.string.paused_update_GUI)))
+                {
+                    // TODO: Currently, the Music Player on the host's phone notifies the
+                    // Connection Manager that the host has played, paused, or stopped the playlist
+                    // by calling a method in the Connection Manager. We plan to replace these
+                    // method calls with broadcast Intents.
+                    baseConnectionManager.sendSig(WifiConnectionManager.SIG_PAUSE_CODE);
+                    enablePlay();
                 }
             }
 
@@ -120,6 +119,11 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 hostMusicPlayerReceiver, hostMusicPlayerActivityFilter
         );
+        // Broadcast an Intent to indicate that HostMusicPlayerActivity has started.
+        Intent startedIntent = new Intent(applicationContext.getString(R.string
+                .host_music_player_activity_started));
+        startedIntent.putExtra(applicationContext.getString(R.string.session_playlist), playlist);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(startedIntent);
     }
 
     private void enablePlay() {
@@ -135,49 +139,13 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
     }
 
     @Override
-    public void playUpdateGUINotifyService(View view) {
-        if (!synchronicityMusicPlayerService.musicPlayerState.isPlaying()) {
-            super.playUpdateGUINotifyService(view);
-            baseConnectionManager.sendSig(WifiConnectionManager.SIG_PLAY_CODE);
-            playPauseButtons.setImageResource(android.R.drawable.ic_media_pause);
-            playPauseButtons.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    pauseUpdateGUINotifyService(view);
-                }
-
-            });
-        }
-    }
-
-    @Override
-    public void pauseUpdateGUINotifyService(View view) {
-        if (!synchronicityMusicPlayerService.musicPlayerState.isPaused()) {
-            super.pauseUpdateGUINotifyService(view);
-            // Broadcast an Intent for all participants to pause the playlist.
-//        broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_pause),
-//                this);
-            baseConnectionManager.sendSig(WifiConnectionManager.SIG_PAUSE_CODE);
-            enablePlay();
-        }
-    }
-
-    @Override
-    public void stopUpdateGUINotifyService(View view) {
-        if (!synchronicityMusicPlayerService.musicPlayerState.isStopped()) {
-            super.stopUpdateGUINotifyService(view);
-            // Broadcast an Intent for all participants to stop the playlist.
-//            broadcastIntentWithoutExtras(applicationContext.getString(R.string.send_stop),
-//                    this);
-            baseConnectionManager.sendSig(WifiConnectionManager.SIG_STOP_CODE);
-            enablePlay();
-        }
-    }
-
-    @Override
-    public void muteUpdateGUINotifyService(View view) {
-        super.muteUpdateGUINotifyService(view);
+    void showPlaylistStopped() {
+        super.showPlaylistStopped();
+        // TODO: Currently, the Music Player on the host's phone notifies the Connection Manager
+        // that the host has played, paused, or stopped the playlist by calling a method in the
+        // Connection Manager. We plan to replace these method calls with broadcast Intents.
+        baseConnectionManager.sendSig(WifiConnectionManager.SIG_STOP_CODE);
+        enablePlay();
     }
 
     @Override
@@ -196,10 +164,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (bound) {
-            unbindService(hostMusicPlayerServiceConnection);
-            bound = false;
-        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(hostMusicPlayerReceiver);
     }
 

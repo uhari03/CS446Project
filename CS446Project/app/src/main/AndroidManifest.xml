@@ -51,15 +51,20 @@
         <activity android:name=".CreatePlaylistActivity" />
 
         <service
-            android:name=".HostMusicPlayerService"
+            android:name=".HostMusicPlayer"
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".ParticipantMusicPlayerService"
+            android:name=".ParticipantMusicPlayer"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".SynchronicityMusicPlayerActivity"></activity>
+        <activity android:name=".SynchronicityMusicPlayerActivity" />
+
+        <service
+            android:name=".MainService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
