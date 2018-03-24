@@ -10,10 +10,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.synchronicity.APBdev.connectivity.ConnectionManager;
-import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
-
 import java.util.ArrayList;
 
 /**
@@ -64,7 +60,6 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
             // Andrew's code
             baseConnectionManager.joinSession("Demo");
         }
-
     }
 
     @Override

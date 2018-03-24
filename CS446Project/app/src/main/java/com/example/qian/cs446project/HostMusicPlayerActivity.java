@@ -23,6 +23,7 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
     private Playlist playlist;
     private IntentFilter hostMusicPlayerActivityFilter;
     private BroadcastReceiver hostMusicPlayerReceiver;
+    private boolean bound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +46,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
         // HostMusicPlayerActivity to represent the session playlist.
         setPlaylist(playlist);
         baseConnectionManager.initiateSession("Demo");
-
     }
 
     @Override
@@ -165,7 +165,6 @@ public class HostMusicPlayerActivity extends SynchronicityMusicPlayerActivity {
     protected void onDestroy() {
         super.onDestroy();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(hostMusicPlayerReceiver);
-
     }
 
 }
