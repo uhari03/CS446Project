@@ -9,9 +9,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.synchronicity.APBdev.connectivity.ConnectionManager;
-import com.synchronicity.APBdev.connectivity.WifiConnectionManager;
-
 public class MainService extends Service {
 
     private IntentFilter mainServiceFilter;
@@ -27,7 +24,6 @@ public class MainService extends Service {
         final Context applicationContext = getApplicationContext();
         playlistManager = new PlaylistManager(getApplicationContext());
         mainServiceFilter = new IntentFilter();
-        ConnectionManager connectionManager = new WifiConnectionManager(applicationContext);
         // When HostMusicPlayerActivity starts, create an instance of HostMusicPlayer, which acts as
         // the model in the MVC design pattern such that HostMusicPlayerActivity is the view.
         mainServiceFilter.addAction(applicationContext.getString(R.string
