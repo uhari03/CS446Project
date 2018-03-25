@@ -176,4 +176,38 @@
     <!--Name of the Intent SynchronicityMusicPlayer broadcasts to indicate that it is now the user's
      group's turn to play the playlist-->
     <string name="this_group_plays">&domain_name;this_group_plays</string>
+    <!--Name of the Intent received by PlaylistManager as a request to publish all device songs-->
+    <string name="list_all_device_songs">&domain_name;list_all_device_songs</string>
+    <!--Name of the Intent published by PlaylistManager with all device songs-->
+    <string name="all_device_songs">&domain_name;all_device_songs</string>
+    <!--Name of the Intent received by PlaylistManager as a request to publish app playlists-->
+    <string name="list_all_app_playlists">&domain_name;list_all_app_playlists</string>
+    <!--Name of the Intent published by PlaylistManager with all app playlists-->
+    <string name="all_app_playlists">&domain_name;all_app_playlists</string>
+    <!--Name of the Intent received by PlaylistManager as a request to publish playlist songs-->
+    <string name="list_all_playlist_songs">&domain_name;list_all_playlist_songs</string>
+    <!--Name of the Intent published by PlaylistManager with all playlist songs-->
+    <string name="all_playlist_songs">&domain_name;all_playlist_songs</string>
+    <!--Name of the Intent received by PlaylistManager as a request to create a new playlist-->
+    <string name="create_new_playlist">&domain_name;create_new_playlist</string>
+    <!--Name of the Intent published by PlaylistManager which indicates successful playlist creation-->
+    <string name="new_playlist_created">&domain_name;new_playlist_created</string>
+    <!--Name of the Intent received by PlaylistManager as a request to add a song to a playlist-->
+    <string name="add_song_to_playlist">&domain_name;add_song_to_playlist</string>
+    <!--Name of the Intent published by PlaylistManager which indicates successful addition of song to playlist-->
+    <string name="song_added_to_playlist">&domain_name;song_added_to_playlist</string>
+    <!--Name of the extra for a playlist sent in the Intent received by PlaylistManager-->
+    <string name="extra_name_playlist">playlist</string>
+    <!--Name of the extra for playlists sent in the Intent published by PlaylistManager-->
+    <string name="extra_name_arraylist_playlist">arraylist_playlist</string>
+    <!--Name of the extra for a song sent in the Intent received by PlaylistManager-->
+    <string name="extra_name_song">song</string>
+    <!--Name of the extra for songs sent in the Intent published by PlaylistManager-->
+    <string name="extra_name_arraylist_song">arraylist_song</string>
+    <!--Name of the extra for songs sent in the Intent published by PlaylistManager-->
+    <string name="extra_name_linkedlist_song">linkedlist_song</string>
+    <!--Name of the extra for a playlist name sent in the Intent received by PlaylistManager-->
+    <string name="extra_name_playlist_name">playlistName</string>
+    <!--Name of the extra for a boolean value sent in the Intent published by PlaylistManager-->
+    <string name="extra_name_success">success</string>
 </resources>
