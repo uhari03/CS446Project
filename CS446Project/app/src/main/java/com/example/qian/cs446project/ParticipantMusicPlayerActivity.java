@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +32,8 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
         muteTogglingButton = findViewById(R.id.imageViewMuteTogglingButton);
         waitMessage = findViewById(R.id.textViewWaitForSongs);
         applicationContext = getApplicationContext();
+        // TODO: Since our application cannot yet send files from one device to another,
+        // participants just use the first of their personal playlists.
         ArrayList<Playlist> allPlaylists = PlaylistManager.listAllAppPlaylists(applicationContext);
         if (allPlaylists == null || allPlaylists.size() == 0) {
             Toast errorToast = Toast.makeText(applicationContext, "Participant failed to retrieve session playlist.",
@@ -54,9 +57,16 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
                 baseConnectionManager.cleanUp();
                 System.exit(1);
             }
-
             setPlaylist(playlist);
             waitMessage.setVisibility(View.INVISIBLE);
+            // Broadcast an Intent to indicate that ParticipantMusicPlayerActivity has
+            // started and has the playlist.
+            Intent startedIntent = new Intent(applicationContext.getString(R.string
+                    .participant_music_player_activity_started));
+            startedIntent.putExtra(applicationContext.getString(R.string.session_playlist),
+                    playlist);
+            LocalBroadcastManager.getInstance(ParticipantMusicPlayerActivity.this)
+                    .sendBroadcast(startedIntent);
             // Andrew's code
             baseConnectionManager.joinSession("Demo");
         }
@@ -119,16 +129,11 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        participantIntentFilter = null;
-        participantMusicPlayerReceiver = null;
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(participantMusicPlayerReceiver);
+        participantIntentFilter = null;
+        participantMusicPlayerReceiver = null;
     }
 
 }

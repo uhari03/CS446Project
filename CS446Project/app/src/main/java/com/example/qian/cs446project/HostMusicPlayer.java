@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import static com.example.qian.cs446project.CS446Utils.broadcastIntentWithoutExtras;
 
@@ -12,15 +14,6 @@ public class HostMusicPlayer extends SynchronicityMusicPlayer {
 
     private BroadcastReceiver hostMusicPlayerReceiver;
     private IntentFilter hostMusicPlayerFilter;
-
-    @Override
-    void resetPlaylist() {
-        super.resetPlaylist();
-        // Broadcast an Intent to indicate that the session playlist has transitioned to a
-        // stopped state.
-        broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_stopped),
-                applicationContext);
-    }
 
     public HostMusicPlayer(final Context applicationContext, Playlist playlist) {
         super(applicationContext, playlist);
@@ -54,7 +47,7 @@ public class HostMusicPlayer extends SynchronicityMusicPlayer {
                 } else if (action.equals(applicationContext.getString(R.string.receive_stop))) {
                     mediaPlayer.stop();
                 } else if (action.equals(applicationContext.getString(R.string.receive_play))) {
-                    mediaPlayer.start();
+                    startMediaPlayer();
                 } else if (action.equals(applicationContext.getString(R.string.receive_pause))) {
                     mediaPlayer.pause();
                 }
@@ -64,6 +57,7 @@ public class HostMusicPlayer extends SynchronicityMusicPlayer {
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
                 hostMusicPlayerReceiver, hostMusicPlayerFilter
         );
+        createMediaPlayer();
     }
 
     @Override
@@ -92,6 +86,14 @@ public class HostMusicPlayer extends SynchronicityMusicPlayer {
     public void stop() {
         if (!musicPlayerState.isStopped()) {
             super.stop();
+            makeThisGroupPlay();
+        }
+    }
+
+    void songCompleted(MediaPlayer mediaPlayer) {
+        super.songCompleted(mediaPlayer);
+        makeThisGroupPlay();
+        if (musicPlayerState.isStopped()) {
             // Broadcast an Intent to indicate that the session playlist has transitioned to a
             // stopped state.
             broadcastIntentWithoutExtras(applicationContext.getString(R.string.playlist_stopped),

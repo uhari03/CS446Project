@@ -170,4 +170,10 @@
     currently playing song in the session playlist (i.e. the amount of time, in milliseconds, that
     the song has played for-->
     <string name="current_position">current_position</string>
+    <!--Name of the Intent SynchronicityMusicPlayer broadcasts to indicate that it is now the other
+     group's turn to play the playlist-->
+    <string name="other_group_plays">&domain_name;other_group_plays</string>
+    <!--Name of the Intent SynchronicityMusicPlayer broadcasts to indicate that it is now the user's
+     group's turn to play the playlist-->
+    <string name="this_group_plays">&domain_name;this_group_plays</string>
 </resources>
