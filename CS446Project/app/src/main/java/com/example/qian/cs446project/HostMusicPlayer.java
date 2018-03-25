@@ -17,14 +17,15 @@ public class HostMusicPlayer extends SynchronicityMusicPlayer {
 
     public HostMusicPlayer(final Context applicationContext, Playlist playlist) {
         super(applicationContext, playlist);
-        // Broadcast an Intent to tell the app that the user has created a session.
-        broadcastIntentWithoutExtras(applicationContext.getString(R.string.session_created),
-                applicationContext);
+        // Broadcast the session playlist.
+        Intent returnPlaylistIntent =
+                new Intent(applicationContext
+                        .getString(R.string.return_session_playlist));
+        returnPlaylistIntent.putExtra(applicationContext
+                .getString(R.string.session_playlist), HostMusicPlayer.this.playlist);
+        LocalBroadcastManager.getInstance(applicationContext)
+                .sendBroadcast(returnPlaylistIntent);
         hostMusicPlayerFilter = new IntentFilter();
-        // When a participant joins the session, the connection manager requests the session
-        // playlist from the host.
-        hostMusicPlayerFilter.addAction(applicationContext.getString(R.string
-                .request_session_playlist));
         hostMusicPlayerFilter.addAction(applicationContext.getString(R.string.receive_stop));
         hostMusicPlayerFilter.addAction(applicationContext.getString(R.string.receive_play));
         hostMusicPlayerFilter
@@ -35,16 +36,7 @@ public class HostMusicPlayer extends SynchronicityMusicPlayer {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 Context applicationContext = HostMusicPlayer.this.applicationContext;
-                if (action.equals(applicationContext.getString(R.string.request_session_playlist)))
-                {
-                    Intent returnPlaylistIntent =
-                            new Intent(applicationContext
-                                    .getString(R.string.return_session_playlist));
-                    returnPlaylistIntent.putExtra(applicationContext
-                            .getString(R.string.session_playlist), HostMusicPlayer.this.playlist);
-                    LocalBroadcastManager.getInstance(applicationContext)
-                            .sendBroadcast(returnPlaylistIntent);
-                } else if (action.equals(applicationContext.getString(R.string.receive_stop))) {
+                if (action.equals(applicationContext.getString(R.string.receive_stop))) {
                     mediaPlayer.stop();
                 } else if (action.equals(applicationContext.getString(R.string.receive_play))) {
                     startMediaPlayer();

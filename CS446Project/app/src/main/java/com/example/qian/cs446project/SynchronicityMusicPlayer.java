@@ -142,7 +142,9 @@ public abstract class SynchronicityMusicPlayer implements MusicPlayer {
 
     void makeThisGroupPlay() {
         setMyTurnToPlay(true);
-        mediaPlayer.setVolume(1, 1);
+        if (!muted) {
+            mediaPlayer.setVolume(1, 1);
+        }
         // Broadcast an Intent to indicate that it is now the user's group's turn to play the
         // playlist.
         broadcastIntentWithoutExtras(applicationContext.getString(R.string.this_group_plays),
@@ -161,9 +163,11 @@ public abstract class SynchronicityMusicPlayer implements MusicPlayer {
 
                 @Override
                 public void run() {
+                    boolean playedDuringThisThread = false;
                     while (currentSong < playlist.songs.size() && mediaPlayer != null) {
                         try {
                             if (!movingToNextSong && musicPlayerState.isPlaying()) {
+                                playedDuringThisThread = true;
                                 Intent updateSongProgressIndicatorsInGUIIntent =
                                         new Intent(applicationContext.getString(R.string
                                                 .update_song_progress));
@@ -189,8 +193,10 @@ public abstract class SynchronicityMusicPlayer implements MusicPlayer {
                                         makeThisGroupPlay();
                                     }
                                 }
-                                Thread.sleep(1000);
+                            } else if (playedDuringThisThread && musicPlayerState.isStopped()) {
+                                break;
                             }
+                            Thread.sleep(1000);
                         } catch (Exception exception) {
                             exception.printStackTrace();
                         }
