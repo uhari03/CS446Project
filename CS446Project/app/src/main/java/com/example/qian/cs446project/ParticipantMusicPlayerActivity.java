@@ -73,11 +73,6 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
     }
 
     @Override
-    void setPlaylist(Playlist playlist) {
-
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
         // Broadcast an Intent to tell other components that the user has joined a certain session
