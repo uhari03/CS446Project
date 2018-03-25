@@ -63,8 +63,8 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
         // metadata of the first song should be bolded to show that it is playing.
         synchronicityMusicPlayerActivityFilter
                 .addAction(applicationContext.getString(R.string.playlist_not_stopped));
-        // Update the currently playing song's progress bar, elapsed time, and remaining time in
-        // the GUI as needed.
+        // Update the currently playing song's progress bar, elapsed time, and remaining time in the
+        // GUI as needed.
         synchronicityMusicPlayerActivityFilter
                 .addAction(applicationContext.getString(R.string.update_song_progress));
         // Update the GUI to reflect the fact that the playlist has been stopped.
@@ -144,7 +144,7 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
         );
     }
 
-    public void setPlaylist(Playlist playlist) {
+    void setPlaylist(Playlist playlist) {
         this.playlist = playlist;
         this.customMusicAdapter =
                 new CustomMusicAdapter(this, R.layout.song_in_gui, playlist);
