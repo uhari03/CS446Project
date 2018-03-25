@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -92,12 +93,13 @@ public abstract class SynchronicityMusicPlayer implements MusicPlayer {
 
     void songCompleted(MediaPlayer mediaPlayer) {
         movingToNextSong = true;
-        ++currentSong;
         secondsSinceLastSwitched = 0;
-        if (currentSong < playlist.songs.size()) {
+        if (currentSong < playlist.songs.size() - 1) {
+            ++currentSong;
             setMediaPlayerToCurrentSong();
             mediaPlayer.start();
         } else {
+            currentSong = 0;
             musicPlayerState = new MusicPlayerStoppedState();
         }
         // Broadcast an Intent to indicate that a song in the session playlist has completed.

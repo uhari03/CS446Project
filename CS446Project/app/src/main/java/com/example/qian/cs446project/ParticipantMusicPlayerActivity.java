@@ -117,7 +117,8 @@ public class ParticipantMusicPlayerActivity extends SynchronicityMusicPlayerActi
                     waitMessage.setVisibility(View.INVISIBLE);
                     // Broadcast an Intent to indicate that ParticipantMusicPlayerActivity has
                     // started and has the playlist.
-                    Intent startedIntent = new Intent(applicationContext.getString(R.string
+                    Intent startedIntent =
+                            new Intent(applicationContext.getString(R.string
                             .participant_music_player_activity_started));
                     startedIntent.putExtra(applicationContext.getString(R.string.session_playlist),
                             playlist);

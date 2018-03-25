@@ -186,17 +186,15 @@ public class SynchronicityMusicPlayerActivity extends AppCompatActivity
     }
 
     private void songCompleted(int currentSong) {
-        if (currentSong < playlist.songs.size()) {
-            this.currentSong = currentSong;
+        this.currentSong = currentSong;
+        if (currentSong >= 1) {
             unboldSongMetadata(currentSong - 1);
             boldSongMetadata(currentSong);
         } else {
             resetPlaylistGUI(true);
-            this.currentSong = 0;
         }
-        songProgressBar =
-                customMusicAdapter.getSongsInGUI().get(this.currentSong).getSongProgressBar();
-        songLength = playlist.songs.get(this.currentSong).getDuration();
+        songProgressBar = customMusicAdapter.getSongsInGUI().get(currentSong).getSongProgressBar();
+        songLength = playlist.songs.get(currentSong).getDuration();
     }
 
     // Ke Qiao Chen: I based this method on https://www.youtube.com/watch?v=zCYQBIcePaw at 14:14
