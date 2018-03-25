@@ -18,6 +18,16 @@ public class ParticipantMusicPlayer extends SynchronicityMusicPlayer {
 
     public ParticipantMusicPlayer(Context applicationContext, Playlist playlist) {
         super(applicationContext, playlist);
+        String temporaryDirectory = applicationContext.getCacheDir().toString();
+        String title;
+        String filePath;
+        Song ithSong;
+        for (int i = 0; i < playlist.songs.size(); ++i) {
+            ithSong = playlist.songs.get(i);
+            filePath = ithSong.getFilePath();
+            title = filePath.substring(filePath.lastIndexOf('/'));
+            playlist.songs.get(i).setFilePath(temporaryDirectory + title);
+        }
         participantMusicPlayerFilter = new IntentFilter();
         // When the 1st song in the session playlist finishes downloading onto the participant's
         // device, it creates a MediaPlayer with that song.
